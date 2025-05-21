@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_bcrypt import Bcrypt
 from flask import request, jsonify
+from dotenv import load_dotenv
+load_dotenv()
+import os
 import mysql.connector
 import openai
 
@@ -12,10 +15,11 @@ bcrypt = Bcrypt(app)
 
 # Connect to MySQL
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="qweqwe",
-    database="learning_game"
+    host=os.getenv("DB_HOST"),
+    port=int(os.getenv("DB_PORT")),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME")
 )
 cursor = db.cursor(dictionary=True)
 

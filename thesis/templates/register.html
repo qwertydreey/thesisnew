@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    
+    <!-- Tailwind CSS -->
+
+    <!-- Bootstrap CSS -->
+    
+    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+</head>
+
+<body>
+    <img class="bg-img" src="{{ url_for('static', filename='images/registerimg/registerbg.png') }}" alt="Background Image">
+
+    <div class="custom-container">
+        <div class="register-wrapper">
+
+            <div class="register-content">
+                <form action="{{ url_for('register') }}" method="POST">
+                    <div class="mb-3">
+                        <input type="text" id="username" name="username" placeholder="Username" class="content username">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="first_name" name="first_name" placeholder="First Name" class="content firstname">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="last_name" name="last_name" placeholder="Last Name" class="content lastname">
+                    </div>
+
+
+
+                            <select id="birth_day" name="birth_day" class="birthday-select day" required>
+                                <option value="" disabled selected>Day</option>
+                                {% for day in range(1, 32) %}
+                                    <option value="{{ day }}">{{ day }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <select id="birth_month" name="birth_month" class="birthday-select month" required>
+                                <option value="" disabled selected>Month</option>
+                                {% for month in ['January','February','March','April','May','June','July','August','September','October','November','December'] %}
+                                    <option value="{{ month }}">{{ month }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="birth_year" name="birth_year" class="birthday-select year" required>
+                                <option value="" disabled selected>Year</option>
+                                {% for year in range(2000, 2026) %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                    
+                    
+                    
+                    <div class="gender-group">
+                        <label class="gender-option male">
+                            👦🏻 Male
+                            <input type="radio" name="gender" value="male"  required>
+                        </label>
+                        <label class="gender-option female">
+                            👩🏻 Female
+                            <input type="radio" name="gender" value="female"  required>
+                        </label>
+                    </div>
+                    
+
+                    <div class="mb-3">
+                        <input type="password" id="password" name="password" placeholder="New password" class="content newpass">
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" class="content confirmpass">
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button type="submit"></button>
+                    </div>
+                    
+
+
+                    <div class="already-acc">
+                        <a href="{{ url_for('login') }}">
+                            <button type="button" class="sign-in"></button>
+                        </a>
+                    </div>
+                    
+                </form>
+            </div>
+    </div>
+
+
+
+      
+</body>
+</html>

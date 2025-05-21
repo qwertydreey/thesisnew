@@ -1,0 +1,360 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Collections</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/collectibles.css') }}">
+  </head>
+  <body>
+
+    <body data-bgm="/static/bgm/collection.mp3">
+      <div class="tab-sections">
+
+        <div class="back-btn-wrapper">
+          <a href="{{ url_for('dashboard') }}" onclick="delayedBackRedirect(event)">
+            <button class="back-btn"></button>
+          </a>
+        </div>
+        
+        <!-- Medals Section -->
+        <div class="tab-slide active" id="medals-section">
+                <div class="grid" id="medals-grid">
+                    <!-- Medals content will be dynamically inserted here -->
+            </div>
+            <button class="nav-btn right" onclick="playButtonClickSound(); showSection('skins-section')">&#9654;</button>
+        </div>
+    
+        <!-- Skins Section (Moved inside tab-sections) -->
+        <div class="tab-slide" id="skins-section">
+          <div class="overlay-content">
+            <div class="skins-container">
+              <div class="skin-display">
+                <!-- Main Skin Image -->
+                <img id="skin-image" src="" alt="Equip Skin" class="skin-image" />
+                <!-- Secondary Image -->
+                <div class="mirror" alt="mirror"></div> 
+              </div>
+              <audio id="buttonClickSound" src="/static/sfx/click.mp3" preload="auto"></audio>
+
+              <button class="carousel-btn prev-btn" id="prev-skin-btn"></button>
+              <button class="carousel-btn next-btn" id="next-skin-btn"></button>
+              
+              <!-- Equip Button -->
+              <button class="equip-btn" id="equip-btn"></button>
+            </div>
+          </div>
+          <button class="nav-btn left" onclick="playButtonClickSound(); showSection('medals-section')">&#9664;</button>
+        </div>
+
+        
+      </div>
+    </body>
+    
+
+
+
+    
+    <script>
+      function playButtonClickSound() {
+        const originalSound = document.getElementById('buttonClickSound');
+        const soundClone = originalSound.cloneNode(); // clone the <audio> element
+        soundClone.volume = 1;
+        soundClone.playbackRate = 2;
+    
+        // Play the cloned audio
+        soundClone.play().catch((e) => {
+            console.error('Playback failed:', e);
+        });
+      }
+
+      document.getElementById('prev-skin-btn').addEventListener('click', () => {
+        playButtonClickSound();
+      });
+    
+      document.getElementById('next-skin-btn').addEventListener('click', () => {
+        playButtonClickSound();
+      });
+
+      document.getElementById('equip-btn').addEventListener('click', () => {
+      playButtonClickSound();
+      });
+    </script>
+    
+
+    <script>
+      function delayedBackRedirect(event) {
+        event.preventDefault(); // Stop default navigation
+        playButtonClickSound(); // Play your custom sound
+        const targetUrl = event.currentTarget.getAttribute('href');
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 400); // 400 milliseconds delay
+      }
+    </script>
+    
+    
+    
+
+
+    <script>
+      let currentIndex = 0;
+      const sections = ['medals-section', 'skins-section'];
+    
+      function showSection(targetId) {
+        const current = document.getElementById(sections[currentIndex]);
+        const nextIndex = sections.indexOf(targetId);
+        const next = document.getElementById(targetId);
+    
+        // Remove active from current and add slide out class
+        current.classList.remove('active');
+        current.classList.add(nextIndex > currentIndex ? 'out-left' : 'out-right');
+    
+        // Reset next slide classes
+        next.classList.remove('out-left', 'out-right');
+        next.classList.add('active');
+    
+        currentIndex = nextIndex;
+      }
+    </script>
+    
+      
+    
+    
+    
+      
+    <script>
+      const maps = ['multiplication', 'addition', 'subtraction', 'division', 'counting', 'comparison', 'numerals', 'placevalue'];
+      const stages = [1, 2, 3];
+      const medalsGrid = document.getElementById('medals-grid');
+    
+      async function loadRewards() {
+        for (const map of maps) {
+          for (const stage of stages) {
+            try {
+              const res = await fetch(`/get_stage_reward?map=${map}&stage=${stage}`);
+              const reward = await res.json();
+    
+              if (reward.error) continue;
+    
+              // Identify which type of image is present
+              const [type, path] = Object.entries(reward)[0];
+              const id = `${map}-stage${stage}-claimed`;
+    
+              const badgeDiv = document.createElement('div');
+              badgeDiv.className = 'squarebadge';
+              badgeDiv.id = id;
+    
+              const img = document.createElement('img');
+              img.src = path;
+              img.alt = `${type}`;
+              img.className = 'badge-image';
+    
+              // Check if claimed from the server
+              const claimCheck = await fetch('/check_reward_claimed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ map, stage })
+              });
+    
+              const claimResult = await claimCheck.json();
+              const claimed = claimResult.claimed;
+    
+              if (!claimed) {
+                img.style.filter = 'grayscale(100%)';
+                img.style.opacity = '0.3';
+              }
+    
+              badgeDiv.appendChild(img);
+              medalsGrid.appendChild(badgeDiv);
+            } catch (err) {
+              console.error(`Error loading reward for ${map} stage ${stage}:`, err);
+            }
+          }
+        }
+      }
+    
+      loadRewards();
+    </script>
+    
+    
+
+    
+  
+  
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          fetch('/get_user_skins')
+              .then(response => response.json())
+              .then(data => {
+                  if (data.error) {
+                      console.error('Error fetching skins:', data.error);
+                      return;
+                  }
+      
+                  const claimedSkinCodes = data.skins.map(skin => skin.skin_code);
+                  const equippedSkinCode = data.equipped_skin;  // from server
+                  console.log('Claimed skins:', claimedSkinCodes);
+                  console.log('Equipped skin:', equippedSkinCode);
+      
+                  const skinMap = {
+                      'r1': 'multiplication-stage3-skin',
+                      'r2': 'addition-stage3-skin',
+                      'r3': 'subtraction-stage3-skin',
+                      'r4': 'division-stage3-skin',
+                      'r5': 'counting-stage3-skin',
+                      'r6': 'comparison-stage3-skin',
+                      'r7': 'numerals-stage3-skin',
+                      'r8': 'placevalue-stage3-skin'
+                  };
+      
+                  const reverseSkinMap = Object.fromEntries(
+                      Object.entries(skinMap).map(([code, id]) => [id, code])
+                  );
+      
+                  const skins = [
+                      { id: 'default-skin', src: '/static/images/gameimg/rewardimg/skins/idle.png' },
+                      { id: 'multiplication-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle1.png' },
+                      { id: 'addition-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle2.png' },
+                      { id: 'subtraction-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle3.png' },
+                      { id: 'division-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle4.png' },
+                      { id: 'counting-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle5.png' },
+                      { id: 'comparison-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle6.png' },
+                      { id: 'numerals-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle7.png' },
+                      { id: 'placevalue-stage3-skin', src: '/static/images/gameimg/rewardimg/skins/idle8.png' }
+                  ];
+      
+                  const equippedSkinId = skinMap[equippedSkinCode] || 'default-skin';
+      
+                  const skinImage = document.getElementById('skin-image');
+                  const prevSkinBtn = document.getElementById('prev-skin-btn');
+                  const nextSkinBtn = document.getElementById('next-skin-btn');
+                  const equipBtn = document.getElementById('equip-btn');
+      
+                  let currentSkinIndex = 0;
+                  let currentEquippedSkin = equippedSkinId;
+      
+                  function updateSkinDisplay() {
+                      const skin = skins[currentSkinIndex];
+                      const isClaimed = skin.id === 'default-skin' || claimedSkinCodes.some(code => skinMap[code] === skin.id);
+      
+                      skinImage.src = skin.src;
+                      skinImage.className = `skin-${currentSkinIndex + 1}`;
+      
+                      skinImage.style.filter = isClaimed ? 'none' : 'grayscale(100%)';
+                      skinImage.style.opacity = isClaimed ? '1' : '0.3';
+      
+                      equipBtn.classList.remove('equip', 'equipped', 'locked');
+      
+                      if (!isClaimed) {
+                          equipBtn.classList.add('locked');
+                          equipBtn.disabled = true;
+                      } else if (currentEquippedSkin === skin.id) {
+                          equipBtn.classList.add('equipped');
+                          equipBtn.disabled = true;
+                      } else {
+                          equipBtn.classList.add('equip');
+                          equipBtn.disabled = false;
+                      }
+                  }
+      
+                  function equipSkin(skinId) {
+                        let skinCode = reverseSkinMap[skinId];
+                        
+                        if (!skinCode && skinId === 'default-skin') {
+                            skinCode = 'default';  // explicitly set for default skin
+                        }
+
+                        if (!skinCode) {
+                            console.error("No skin_code found for:", skinId);
+                            return;
+                        }
+
+                        console.log("Equipping skin_code:", skinCode);
+
+                        fetch('/update_equipped_skin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ skin_id: skinCode })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("HTTP error " + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.error) {
+                                console.error('Failed to equip skin:', data.error);
+                            } else {
+                                console.log(data.message);
+                                currentEquippedSkin = skinId;
+                                updateSkinDisplay();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Equip error:', error);
+                        });
+                    }
+
+      
+                  function showNextSkin() {
+                      currentSkinIndex = (currentSkinIndex + 1) % skins.length;
+                      updateSkinDisplay();
+                  }
+      
+                  function showPrevSkin() {
+                      currentSkinIndex = (currentSkinIndex - 1 + skins.length) % skins.length;
+                      updateSkinDisplay();
+                  }
+      
+                  nextSkinBtn.addEventListener('click', showNextSkin);
+                  prevSkinBtn.addEventListener('click', showPrevSkin);
+                  equipBtn.addEventListener('click', () => {
+                      const selectedSkin = skins[currentSkinIndex];
+                      equipSkin(selectedSkin.id);
+                  });
+      
+                  // Set current index to equipped skin
+                  currentSkinIndex = skins.findIndex(s => s.id === equippedSkinId);
+                  if (currentSkinIndex === -1) currentSkinIndex = 0;
+      
+                  updateSkinDisplay();
+              })
+              .catch(error => {
+                  console.error('Fetch error:', error);
+              });
+      });
+      </script>
+      
+
+      <script defer src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
+
+    
+  
+    
+    
+    
+      
+
+    
+
+    
+    
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+    
+  </body>
+  </html>

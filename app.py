@@ -7,6 +7,7 @@ import os
 import mysql.connector
 import openai
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this later
 

@@ -227,7 +227,6 @@ function watchIntro() {
         });
     </script>
     
-    <!-- ✅ SCRIPT -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const loginForm = document.getElementById('loginForm');
@@ -277,32 +276,36 @@ function watchIntro() {
     
                     const formData = new FormData(loginForm);
     
-                    fetch('{{ url_for("login") }}', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.body.removeChild(overlay);
+                    // Delay the fetch call by 1 second (1000ms)
+                    setTimeout(() => {
+                        fetch('{{ url_for("login") }}', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.body.removeChild(overlay);
     
-                        if (data.success) {
-                            window.location.href = data.redirect;
-                        } else {
-                            alert(data.message);
-                            passwordInput.value = ''; // Clear password
-                            passwordInput.focus();
-                        }
-                    })
-                    .catch(error => {
-                        document.body.removeChild(overlay);
-                        alert('An error occurred. Please try again.');
-                        console.error(error);
-                    });
+                            if (data.success) {
+                                window.location.href = data.redirect;
+                            } else {
+                                alert(data.message);
+                                passwordInput.value = ''; // Clear password
+                                passwordInput.focus();
+                            }
+                        })
+                        .catch(error => {
+                            document.body.removeChild(overlay);
+                            alert('An error occurred. Please try again.');
+                            console.error(error);
+                        });
+                    }, 1000); // 1 second delay here
                 });
             }
         });
     </script>
-    
+    <script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
+
     
 </body>
 </html>

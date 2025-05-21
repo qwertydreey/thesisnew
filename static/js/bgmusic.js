@@ -1,40 +1,72 @@
 function initBackgroundMusic() {
+    // Static variables to keep state and avoid duplicate listeners
+    if (!initBackgroundMusic.state) {
+        initBackgroundMusic.state = {
+            bgMusic: null,
+            volumeListenersAdded: false,
+            muteListenersAdded: false,
+            isBgmMuted: false,
+            previousBgmVolume: 50,
+            sfxVolume: 1,
+            isSfxMuted: false,
+            settingsLoaded: false
+        };
+    }
+
+    const state = initBackgroundMusic.state;
+
+    // Get control elements
+    const volumeSlider = document.getElementById('volume');
+    const sfxVolumeSlider = document.getElementById('sfx-volume');
+    const muteCheckbox = document.getElementById('muteCheckbox');
+    const sfxMuteCheckbox = document.getElementById('sfxMuteCheckbox');
+
+    // Load saved settings once
+    if (!state.settingsLoaded) {
+        const savedBgmVolume = localStorage.getItem('bgmVolume');
+        const savedBgmMute = localStorage.getItem('bgmMuted');
+        const savedSfxVolume = localStorage.getItem('sfxVolume');
+        const savedSfxMute = localStorage.getItem('sfxMuted');
+
+        if (savedBgmVolume !== null) {
+            const vol = parseInt(savedBgmVolume, 10);
+            if (!isNaN(vol)) {
+                state.previousBgmVolume = vol;
+                if (volumeSlider) volumeSlider.value = vol;
+            }
+        }
+        if (savedBgmMute === 'true') {
+            state.isBgmMuted = true;
+        }
+        if (savedSfxVolume !== null) {
+            const sfxVol = parseFloat(savedSfxVolume);
+            if (!isNaN(sfxVol)) {
+                state.sfxVolume = sfxVol;
+                if (sfxVolumeSlider) sfxVolumeSlider.value = sfxVol * 100;
+            }
+        }
+        if (savedSfxMute === 'true') {
+            state.isSfxMuted = true;
+        }
+        state.settingsLoaded = true;
+    }
+
+    // Create or reuse bgMusic element
+    if (!state.bgMusic) {
+        let bgMusic = document.getElementById('bg-music');
+        if (!bgMusic) {
+            bgMusic = document.createElement('audio');
+            bgMusic.id = 'bg-music';
+            bgMusic.loop = true;
+            bgMusic.autoplay = false;
+            document.body.appendChild(bgMusic);
+        }
+        state.bgMusic = bgMusic;
+    }
+
+    // Determine current bgm source based on map parameter or attribute
     const bodyBgmAttr = document.body.getAttribute('data-bgm');
-    let bgMusicSrc = '/static/sfx/default.mp3';
-    let bgMusic = document.getElementById('bg-music'); // check if exists
-    let volumeSlider = document.getElementById('volume');
-    let sfxVolumeSlider = document.getElementById('sfx-volume');
-    let isBgmMuted = false;
-    let previousBgmVolume = 50;  // Default volume 50%
-    let sfxVolume = 1;
-    let isSfxMuted = false;
-
-    // Load saved settings
-    const savedBgmVolume = localStorage.getItem('bgmVolume');
-    const savedBgmMute = localStorage.getItem('bgmMuted');
-    const savedSfxVolume = localStorage.getItem('sfxVolume');
-    const savedSfxMute = localStorage.getItem('sfxMuted');
-
-    if (savedBgmVolume !== null) {
-        previousBgmVolume = parseInt(savedBgmVolume, 10);
-        if (!isNaN(previousBgmVolume) && volumeSlider) {
-            volumeSlider.value = previousBgmVolume;
-        }
-    }
-    if (savedBgmMute === 'true') {
-        isBgmMuted = true;
-    }
-    if (savedSfxVolume !== null) {
-        sfxVolume = parseFloat(savedSfxVolume);
-        if (!isNaN(sfxVolume) && sfxVolumeSlider) {
-            sfxVolumeSlider.value = sfxVolume * 100;
-        }
-    }
-    if (savedSfxMute === 'true') {
-        isSfxMuted = true;
-    }
-
-    // Determine bgMusicSrc based on attribute or URL param
+    let bgMusicSrc = '';
     if (bodyBgmAttr === 'dynamic') {
         const urlParams = new URLSearchParams(window.location.search);
         const selectedMap = urlParams.get('map') || 'multiplication';
@@ -46,102 +78,98 @@ function initBackgroundMusic() {
             counting: '/static/bgm/counting.mp3',
             comparison: '/static/bgm/comparison.mp3',
             numerals: '/static/bgm/numerals.mp3',
-            placevalue: '/static/bgm/placevalue.mp3'
+            placevalue: '/static/bgm/placevalue.mp3',
         };
-        bgMusicSrc = mapMusicSources[selectedMap] || '/static/sfx/default.mp3';
+        bgMusicSrc = mapMusicSources[selectedMap] || '';
     } else if (bodyBgmAttr) {
         bgMusicSrc = bodyBgmAttr;
     }
 
-    // Create bgMusic element if missing
-    if (!bgMusic) {
-        bgMusic = document.createElement('audio');
-        bgMusic.id = 'bg-music';
-        bgMusic.loop = true;
-        bgMusic.autoplay = false;
-        document.body.appendChild(bgMusic);
+    // Update audio source only if changed
+    if (bgMusicSrc && state.bgMusic.src !== bgMusicSrc) {
+        state.bgMusic.src = bgMusicSrc;
+        state.bgMusic.load(); // reload the source
     }
 
-    // Update source and volume
-    if (bgMusic.src !== bgMusicSrc) {
-        bgMusic.src = bgMusicSrc;
-    }
-    bgMusic.volume = isBgmMuted ? 0 : previousBgmVolume / 100;
+    // Set volume and mute state
+    state.bgMusic.volume = state.isBgmMuted ? 0 : state.previousBgmVolume / 100;
+    state.bgMusic.muted = state.isBgmMuted;
 
-    // Setup volume sliders listeners only once
-    if (!initBackgroundMusic.volumeListenersAdded) {
+    // Add volume listeners once
+    if (!state.volumeListenersAdded) {
         if (volumeSlider) {
             volumeSlider.addEventListener('input', () => {
-                if (isBgmMuted) return;
+                if (state.isBgmMuted) return;
                 const value = volumeSlider.value;
-                const volume = value / 100;
-                bgMusic.volume = volume;
+                state.bgMusic.volume = value / 100;
+                state.previousBgmVolume = parseInt(value, 10);
                 localStorage.setItem('bgmVolume', value);
             });
         }
         if (sfxVolumeSlider) {
             sfxVolumeSlider.addEventListener('input', () => {
-                if (isSfxMuted) return;
-                sfxVolume = sfxVolumeSlider.value / 100;
-                localStorage.setItem('sfxVolume', sfxVolume);
+                if (state.isSfxMuted) return;
+                state.sfxVolume = sfxVolumeSlider.value / 100;
+                localStorage.setItem('sfxVolume', state.sfxVolume);
             });
         }
-        initBackgroundMusic.volumeListenersAdded = true;
+        state.volumeListenersAdded = true;
     }
 
-    // New: Play background music only after first user interaction
-    function playBackgroundMusicOnInteraction() {
-        function playMusic() {
-            bgMusic.play().catch(err => {
-                console.warn('Autoplay blocked even after interaction:', err);
-            });
-            window.removeEventListener('click', playMusic);
-            window.removeEventListener('keydown', playMusic);
-            window.removeEventListener('touchstart', playMusic);
-        }
-        window.addEventListener('click', playMusic);
-        window.addEventListener('keydown', playMusic);
-        window.addEventListener('touchstart', playMusic);
-    }
-
-    if (bgMusic.paused) {
-        playBackgroundMusicOnInteraction();
-    }
-
-    // Setup mute checkbox listeners only once
-    if (!initBackgroundMusic.muteListenersAdded) {
-        const muteCheckbox = document.getElementById("muteCheckbox");
+    // Add mute listeners once
+    if (!state.muteListenersAdded) {
         if (muteCheckbox) {
-            muteCheckbox.checked = isBgmMuted;
-            muteCheckbox.addEventListener('change', function (e) {
-                if (e.target.checked) {
-                    bgMusic.volume = 0;
-                    isBgmMuted = true;
-                } else {
-                    bgMusic.volume = volumeSlider.value / 100;
-                    isBgmMuted = false;
-                }
-                localStorage.setItem('bgmMuted', isBgmMuted);
+            muteCheckbox.checked = state.isBgmMuted;
+            muteCheckbox.addEventListener('change', (e) => {
+                state.isBgmMuted = e.target.checked;
+                state.bgMusic.volume = state.isBgmMuted ? 0 : (volumeSlider ? volumeSlider.value / 100 : state.previousBgmVolume / 100);
+                state.bgMusic.muted = state.isBgmMuted;
+                localStorage.setItem('bgmMuted', state.isBgmMuted);
             });
         }
 
-        const sfxMuteCheckbox = document.getElementById("sfxMuteCheckbox");
         if (sfxMuteCheckbox) {
-            sfxMuteCheckbox.checked = isSfxMuted;
-            sfxMuteCheckbox.addEventListener('change', function (e) {
-                isSfxMuted = e.target.checked;
-                localStorage.setItem('sfxMuted', isSfxMuted);
+            sfxMuteCheckbox.checked = state.isSfxMuted;
+            sfxMuteCheckbox.addEventListener('change', (e) => {
+                state.isSfxMuted = e.target.checked;
+                localStorage.setItem('sfxMuted', state.isSfxMuted);
             });
         }
-        initBackgroundMusic.muteListenersAdded = true;
+        state.muteListenersAdded = true;
+    }
+
+    // Detect if page reload (using PerformanceNavigationTiming API)
+    const perfEntries = performance.getEntriesByType("navigation");
+    const isReload = perfEntries.length > 0 && perfEntries[0].type === "reload";
+
+    if (isReload) {
+        // On reload, play only on first user interaction
+        const playOnInteraction = () => {
+            state.bgMusic.play().catch(e => console.log('Autoplay prevented:', e));
+            window.removeEventListener('click', playOnInteraction);
+            window.removeEventListener('keydown', playOnInteraction);
+            window.removeEventListener('touchstart', playOnInteraction);
+        };
+        window.addEventListener('click', playOnInteraction);
+        window.addEventListener('keydown', playOnInteraction);
+        window.addEventListener('touchstart', playOnInteraction);
+    } else {
+        // Normal load, autoplay if not muted
+        if (!state.isBgmMuted) {
+            state.bgMusic.play().catch(e => console.log('Autoplay prevented:', e));
+        }
     }
 }
+
+
+
+
 
 // Initialize on page load
 window.addEventListener('load', initBackgroundMusic);
 
-// Handle page show from bfcache (e.g. back button)
-window.addEventListener('pageshow', function (event) {
+// Handle pageshow (back-forward cache) to resume bgMusic if paused
+window.addEventListener('pageshow', (event) => {
     if (event.persisted) {
         const bgMusic = document.getElementById('bg-music');
         if (bgMusic && bgMusic.paused) {
@@ -150,20 +178,37 @@ window.addEventListener('pageshow', function (event) {
     }
 });
 
-// Global sound functions (can keep or adapt as needed)
-window.playSound = function (src, delay = 0) {
+// Global sound functions
+window.playSound = function(src, delay = 0) {
+    // Try to get volume slider by id; fallback to default volume 1
     const sfxVolumeSlider = document.getElementById('sfx-volume');
-    let isSfxMuted = false;
+    let volume = 1;
+    
+    // If slider exists, read volume from slider
     if (sfxVolumeSlider) {
-        isSfxMuted = sfxVolumeSlider.disabled || sfxVolumeSlider.value === 0;
+        volume = parseFloat(sfxVolumeSlider.value) / 100;
+    } else {
+        // Optionally, get volume from localStorage (if you want volume to persist)
+        const storedVolume = localStorage.getItem('sfxVolume');
+        if (storedVolume !== null) {
+            volume = parseFloat(storedVolume);
+        }
     }
-    if (isSfxMuted) return;
+    
+    // Get mute status from localStorage (should be persistent across pages)
+    const isSfxMuted = localStorage.getItem('sfxMuted') === 'true';
+
+    // Stop playing if muted or volume is zero
+    if (isSfxMuted || volume === 0) return;
+
     setTimeout(() => {
         const sound = new Audio(src);
-        sound.volume = sfxVolumeSlider ? sfxVolumeSlider.value / 100 : 1;
+        sound.volume = volume;
         sound.play();
     }, delay);
 };
+
+
 
 window.muteBgMusic = function () {
     const bgMusic = document.getElementById('bg-music');
@@ -181,5 +226,5 @@ window.toggleBgMusic = function () {
 };
 
 window.toggleSfxMute = function () {
-    // Implement your SFX mute toggle here if needed
+    // You can implement this as needed based on your sfx mute checkbox
 };

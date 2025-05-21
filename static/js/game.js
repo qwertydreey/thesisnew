@@ -114,17 +114,29 @@ async function saveProgress() {
 
 
 async function switchMap(newMap) {
-  // Before switching, save the current map progress
+  // Save current map progress first
   await saveProgress();
 
-  // Log the switch
   console.log(`🔄 Switching from ${selectedMap} to ${newMap}`);
 
-  // Now switch to the new map and load the new progress
+  // Update selectedMap variable
   selectedMap = newMap;
-  await loadProgress();  // Load progress for the new map
-  await fetchNewQuestion();  // Get a new question for the new map
+
+  // Update the URL param 'map' so other logic (like BGM) knows the current map
+  const url = new URL(window.location);
+  url.searchParams.set('map', newMap);
+  window.history.replaceState({}, '', url);
+
+  // Update background music based on new map
+  initBackgroundMusic();
+
+  // Load progress for the new map
+  await loadProgress();
+
+  // Fetch new question for the new map
+  await fetchNewQuestion();
 }
+
 
 
 
@@ -450,24 +462,6 @@ async function updateDifficulty() {
 
 
 
-
-
-
-
-
-
-
-
-
-// === Difficulty Update ===
-function getMapDifficulty(mapName) {
-  return localStorage.getItem(`${mapName}-difficulty`) || 'easy';
-}
-
-function updateMapDifficulty(mapName, difficulty) {
-  localStorage.setItem(`${mapName}-difficulty`, difficulty);
-  console.log(`✅ Difficulty for ${mapName} updated to: ${difficulty}`);
-}
 
 
 
@@ -1247,168 +1241,151 @@ function checkGameOver() {
 
 
 
-// Define the victory sound
-const victorySound = new Audio('/static/sfx/victory.mp3');
-victorySound.volume = 0.7; // Optional: set volume
 
-// Define the click sound
-const clickSound = new Audio('/static/sfx/click.mp3');
-clickSound.volume = 0.5; // Optional: set volume
 
 function showVictoryScreen() {
-    const gameContainer = document.querySelector('.ground');
-    if (!gameContainer) {
-        console.error("Game container not found!");
-        return;
-    }
+  const gameContainer = document.querySelector('.ground');
+  if (!gameContainer) {
+      console.error("Game container not found!");
+      return;
+  }
 
-    const victoryScreen = document.getElementById('victory-screen');
-    const victoryBox = victoryScreen.querySelector('.victory-box');
-    const continueBtn = document.getElementById('continue-btn');
-    const retryBtn = document.getElementById('retry-btn');
-    const homeBtn = document.getElementById('home-btn');
+  const victoryScreen = document.getElementById('victory-screen');
+  const victoryBox = victoryScreen.querySelector('.victory-box');
+  const continueBtn = document.getElementById('continue-btn');
+  const retryBtn = document.getElementById('retry-btn');
+  const homeBtn = document.getElementById('home-btn');
 
-    console.log("Victory screen elements initialized.");
+  console.log("Victory screen elements initialized.");
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedMap = urlParams.get('map') || 'multiplication';
-    const selectedStage = parseInt(urlParams.get('stage')) || 1;
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedMap = urlParams.get('map') || 'multiplication';
+  const selectedStage = parseInt(urlParams.get('stage')) || 1;
 
-    // Button actions with click sound
-    continueBtn.onclick = () => {
-        console.log("Continue button clicked.");
-        clickSound.play();
-        window.location.href = `/stages?map=${selectedMap}&stage=${selectedStage}`;
-    };
-    retryBtn.onclick = () => {
-        console.log("Retry button clicked.");
-        clickSound.play();
-        window.location.reload();
-    };
-    homeBtn.onclick = () => {
-        console.log("Home button clicked.");
-        clickSound.play();
-        window.location.href = "/roadmap";
-    };
+  // Button actions with click sound
+  continueBtn.onclick = () => {
+      console.log("Continue button clicked.");
+      window.playSound('/static/sfx/click.mp3', 0.5);
+      document.getElementById('bg-music')?.pause();
+      playExitAnimationAndNavigate(`/stages?map=${selectedMap}&stage=${selectedStage}`);
+  };
 
-    // Remove all monsters and pause the game
-    document.querySelectorAll('.monster, .monster-spawn, .monster-death').forEach(el => el.remove());
-    gameContainer.classList.add('paused');
+  retryBtn.onclick = () => {
+      window.playSound('/static/sfx/click.mp3', 0.5);
+      document.getElementById('bg-music')?.pause();
+      playExitAnimationAndNavigate('reload');
+  };
 
-    // Show the victory screen and play the victory sound
-    victoryScreen.style.visibility = 'visible';
-    victoryScreen.classList.add('visible');
-    document.getElementById('bg-music')?.pause();
-    victorySound.play();
-    victoryBox.classList.add('box-animation');
+  homeBtn.onclick = () => {
+      window.playSound('/static/sfx/click.mp3', 0.5);
+      document.getElementById('bg-music')?.pause();
+      playExitAnimationAndNavigate('/roadmap');
+  };
 
-    console.log("Victory screen displayed.");
+  // Remove all monsters and pause the game
+  document.querySelectorAll('.monster, .monster-spawn, .monster-death').forEach(el => el.remove());
+  gameContainer.classList.add('paused');
 
-    // Fetch reward for the selected stage
-    fetch(`/get_stage_reward?map=${selectedMap}&stage=${selectedStage}`)
-        .then(res => res.json())
-        .then(data => {
-            console.log("Reward data fetched:", data);
-            if (data.error) return;
+  // Show the victory screen and play the victory sound
+  victoryScreen.style.visibility = 'visible';
+  victoryScreen.classList.add('visible');
+  document.getElementById('bg-music')?.pause();
+  window.playSound('/static/sfx/victory.mp3', 0.7);
+  victoryBox.classList.add('box-animation');
 
-            const { badge, title, border } = data;
-            const rewardCategories = rewardMap[selectedMap];
-            if (!rewardCategories) return;
+  console.log("Victory screen displayed.");
 
-            const badgeElement = document.getElementById(rewardCategories[1]);
-            const titleElement = document.getElementById(rewardCategories[2]);
-            const borderElement = document.getElementById(rewardCategories[3]);
+  // Fetch reward for the selected stage
+  fetch(`/get_stage_reward?map=${selectedMap}&stage=${selectedStage}`)
+      .then(res => res.json())
+      .then(data => {
+          console.log("Reward data fetched:", data);
+          if (data.error) return;
 
-            // Hide reward elements initially
-            [badgeElement, titleElement, borderElement].forEach(el => el?.classList.add('hidden'));
-            document.getElementById('reward-claimed-text')?.remove();
+          const { badge, title, border } = data;
+          const rewardCategories = rewardMap[selectedMap];
+          if (!rewardCategories) return;
 
-            // Check if the reward has already been claimed
-            fetch('/check_reward_claimed', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    map: selectedMap,
-                    stage: selectedStage
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                console.log("Reward claim status:", data);
-                const rewardStatusText = document.createElement('div');
-                rewardStatusText.id = "reward-claimed-text";
-                rewardStatusText.className = "reward-claimed-text fade-in";
+          const badgeElement = document.getElementById(rewardCategories[1]);
+          const titleElement = document.getElementById(rewardCategories[2]);
+          const borderElement = document.getElementById(rewardCategories[3]);
 
-                if (data.error) {
-                    console.warn('Reward check failed:', data.error);
-                    rewardStatusText.textContent = "⚠️ Unable to verify reward.";
-                    victoryBox.appendChild(rewardStatusText);
-                    return;
-                }
+          // Hide reward elements initially
+          [badgeElement, titleElement, borderElement].forEach(el => el?.classList.add('hidden'));
+          document.getElementById('reward-claimed-text')?.remove();
 
-                if (data.claimed) {
-                    rewardStatusText.textContent = "🎉 Reward Claimed!";
-                    victoryBox.appendChild(rewardStatusText);
-                } else {
-                    if (selectedStage === 1 && badgeElement) {
-                        badgeElement.src = badge;
-                        badgeElement.classList.remove('hidden');
-                    } else if (selectedStage === 2 && titleElement) {
-                        titleElement.src = title;
-                        titleElement.classList.remove('hidden');
-                    } else if (selectedStage === 3 && borderElement) {
-                        borderElement.src = border;
-                        borderElement.classList.remove('hidden');
-                    }
+          // Check if the reward has already been claimed
+          fetch('/check_reward_claimed', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  map: selectedMap,
+                  stage: selectedStage
+              })
+          })
+          .then(res => res.json())
+          .then(data => {
+              console.log("Reward claim status:", data);
+              const rewardStatusText = document.createElement('div');
+              rewardStatusText.id = "reward-claimed-text";
+              rewardStatusText.className = "reward-claimed-text fade-in";
 
-                    fetch('/claim_reward', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            map: selectedMap,
-                            stage: selectedStage
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(() => {
-                        console.log("Reward claimed successfully");
-                    })
-                    .catch(err => {
-                        console.warn('Claim reward failed:', err.message);
-                    });
-                }
-            })
-            .catch(err => console.error('Error checking reward:', err));
-        })
-        .catch(err => console.error('Error fetching stage reward:', err));
+              if (data.error) {
+                  console.warn('Reward check failed:', data.error);
+                  rewardStatusText.textContent = "⚠️ Unable to verify reward.";
+                  victoryBox.appendChild(rewardStatusText);
+                  return;
+              }
 
-          // === PROGRESS UPDATE ===
+              if (data.claimed) {
+                  rewardStatusText.textContent = "🎉 Reward Claimed!";
+                  victoryBox.appendChild(rewardStatusText);
+              } else {
+                  if (selectedStage === 1 && badgeElement) {
+                      badgeElement.src = badge;
+                      badgeElement.classList.remove('hidden');
+                  } else if (selectedStage === 2 && titleElement) {
+                      titleElement.src = title;
+                      titleElement.classList.remove('hidden');
+                  } else if (selectedStage === 3 && borderElement) {
+                      borderElement.src = border;
+                      borderElement.classList.remove('hidden');
+                  }
+
+                  fetch('/claim_reward', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                          map: selectedMap,
+                          stage: selectedStage
+                      })
+                  })
+                  .then(res => res.json())
+                  .then(() => {
+                      console.log("Reward claimed successfully");
+                  })
+                  .catch(err => {
+                      console.warn('Claim reward failed:', err.message);
+                  });
+              }
+          })
+          .catch(err => console.error('Error checking reward:', err));
+      })
+      .catch(err => console.error('Error fetching stage reward:', err));
+
+  // === PROGRESS UPDATE ===
   if (selectedMap && selectedStage) {
-    const starsEarned = 1;
-    updateStageProgress(selectedMap, selectedStage, starsEarned);
-    updateRoadmapStars(`${selectedMap}-${selectedStage}`);
+      const starsEarned = 1;
+      updateStageProgress(selectedMap, selectedStage, starsEarned);
+      updateRoadmapStars(`${selectedMap}-${selectedStage}`);
   }
 }
 
 
 
-
-  
-
-
-  
-  
-  
-
-  
-  
-  
-  
-  
   
   function incrementStageProgress(stageKey) {
         //================CONNECTION > DATABASE==========================//
-    let stageData = JSON.parse(localStorage.getItem(stageKey)) || { stars: 0, completed: false };
   
     if (stageData.stars < 3) {
         stageData.stars++;
@@ -1418,7 +1395,6 @@ function showVictoryScreen() {
         stageData.completed = true;
     }
       //================CONNECTION > DATABASE==========================//
-    localStorage.setItem(stageKey, JSON.stringify(stageData));
     setStars(`.${stageKey}-stars`, stageKey);
   }
   
@@ -1530,6 +1506,74 @@ function calculateStars() {
 // ================================================================================================ //
 // ================================================================================================ //
 
+function playExitAnimationAndNavigate(targetUrl) {
+  // Pause bg music
+  document.getElementById('bg-music')?.pause();
+
+  // Create loading overlay
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.style.position = 'fixed';
+  loadingOverlay.style.top = '0';
+  loadingOverlay.style.left = '0';
+  loadingOverlay.style.width = '100vw';
+  loadingOverlay.style.height = '100vh';
+  loadingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+  loadingOverlay.style.backdropFilter = 'blur(10px)';
+  loadingOverlay.style.webkitBackdropFilter = 'blur(10px)';
+  loadingOverlay.style.display = 'flex';
+  loadingOverlay.style.justifyContent = 'center';
+  loadingOverlay.style.alignItems = 'center';
+  loadingOverlay.style.zIndex = '9999';
+
+  const topHalf = document.createElement('img');
+  topHalf.src = '/static/images/anim/loading/up.png';
+  topHalf.style.position = 'absolute';
+  topHalf.style.top = '0';
+  topHalf.style.left = '0';
+  topHalf.style.width = '100vw';
+  topHalf.style.height = '50%';
+  topHalf.style.objectFit = 'fill';
+  topHalf.style.transition = 'transform 2s ease';
+  topHalf.style.willChange = 'transform';
+
+  const bottomHalf = document.createElement('img');
+  bottomHalf.src = '/static/images/anim/loading/down.png';
+  bottomHalf.style.position = 'absolute';
+  bottomHalf.style.bottom = '0';
+  bottomHalf.style.left = '0';
+  bottomHalf.style.width = '100vw';
+  bottomHalf.style.height = '50%';
+  bottomHalf.style.objectFit = 'fill';
+  bottomHalf.style.transition = 'transform 2s ease';
+  bottomHalf.style.willChange = 'transform';
+
+  loadingOverlay.appendChild(topHalf);
+  loadingOverlay.appendChild(bottomHalf);
+  document.body.appendChild(loadingOverlay);
+
+  // Play loading SFX
+  window.playSound('/static/sfx/loading.mp3', 0);
+
+  // Force reflow
+  void topHalf.offsetHeight;
+
+  // Animate sliding
+  setTimeout(() => {
+    topHalf.style.transform = 'translateY(-100%)';
+    bottomHalf.style.transform = 'translateY(100%)';
+  }, 0);
+
+  // Navigate after animation
+  setTimeout(() => {
+    if (targetUrl === 'reload') {
+      window.location.reload();
+    } else {
+      window.location.href = targetUrl;
+    }
+  }, 2300);
+}
+
+
 // Show the game over screen
 function showGameOverScreen() {
   const gameContainer = document.querySelector('.ground');
@@ -1559,13 +1603,15 @@ function showGameOverScreen() {
 
   // Button events
   retryBtn.onclick = () => {
-    window.location.reload();
+    document.getElementById('bg-music')?.pause();
+    playExitAnimationAndNavigate('reload');
   };
 
   const routePaths = document.getElementById("route-paths").dataset;
 
   homeBtn.onclick = () => {
-    window.location.href = routePaths.dashboard;
+    document.getElementById('bg-music')?.pause();
+    playExitAnimationAndNavigate(routePaths.dashboard);
   };
 }
 
@@ -2177,13 +2223,75 @@ function applySettings() {
 // ===== GAME CONTROL =====
 function restartGame() {
   playButtonClickSound();
-  location.reload();
+  document.getElementById('bg-music')?.pause();
+  playExitAnimationAndNavigate('reload');
 }
 
 function goToMainMenu() {
+  // Pause background music
+  document.getElementById('bg-music')?.pause();
+
   playButtonClickSound();
   const routePaths = document.getElementById("route-paths").dataset;
-  window.location.href = routePaths.dashboard;
+
+  // Create a loading overlay with blur effect
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.style.position = 'fixed';
+  loadingOverlay.style.top = '0';
+  loadingOverlay.style.left = '0';
+  loadingOverlay.style.width = '100vw';
+  loadingOverlay.style.height = '100vh';
+  loadingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+  loadingOverlay.style.backdropFilter = 'blur(10px)';
+  loadingOverlay.style.webkitBackdropFilter = 'blur(10px)';
+  loadingOverlay.style.display = 'flex';
+  loadingOverlay.style.justifyContent = 'center';
+  loadingOverlay.style.alignItems = 'center';
+  loadingOverlay.style.zIndex = '9999';
+
+  // Create the top and bottom images
+  const topHalf = document.createElement('img');
+  topHalf.src = '/static/images/anim/loading/up.png';
+  topHalf.style.position = 'absolute';
+  topHalf.style.top = '0';
+  topHalf.style.left = '0';
+  topHalf.style.width = '100vw';
+  topHalf.style.height = '50%';
+  topHalf.style.objectFit = 'fill';
+  topHalf.style.transition = 'transform 2s ease';
+  topHalf.style.willChange = 'transform';
+
+  const bottomHalf = document.createElement('img');
+  bottomHalf.src = '/static/images/anim/loading/down.png';
+  bottomHalf.style.position = 'absolute';
+  bottomHalf.style.bottom = '0';
+  bottomHalf.style.left = '0';
+  bottomHalf.style.width = '100vw';
+  bottomHalf.style.height = '50%';
+  bottomHalf.style.objectFit = 'fill';
+  bottomHalf.style.transition = 'transform 2s ease';
+  bottomHalf.style.willChange = 'transform';
+
+  loadingOverlay.appendChild(topHalf);
+  loadingOverlay.appendChild(bottomHalf);
+  document.body.appendChild(loadingOverlay);
+
+  // 🔊 Play loading SFX (same as stage enter)
+  window.playSound('/static/sfx/loading.mp3', 0);
+
+  // Force layout reflow
+  void topHalf.offsetHeight;
+
+  // Animate the split screen
+  setTimeout(() => {
+    topHalf.style.transform = 'translateY(-100%)';
+    bottomHalf.style.transform = 'translateY(100%)';
+  }, 0);
+
+  // Navigate after animation
+  setTimeout(() => {
+    window.location.href = routePaths.dashboard;
+  }, 2300);
 }
 
 // ===== MENU OVERLAY HANDLING =====

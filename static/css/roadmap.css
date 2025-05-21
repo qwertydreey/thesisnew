@@ -36,6 +36,11 @@ body {
   height: 100vh;
   object-fit: fill; /* Force stretching */
   z-index: 0;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Generic button styling (acts like cutout image) */
@@ -49,7 +54,11 @@ body {
   box-shadow: none;
   cursor: pointer;
   transition: transform 0.2s ease;
-
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
   /* Shadow Border */
   filter: drop-shadow(0 0 5px rgba(255, 255, 150, 0.6))
           drop-shadow(0 0 10px rgba(255, 255, 150, 0.4))
@@ -74,6 +83,11 @@ body {
   width: 60%; /* Adjust to fit nicely in the wrapper */
   height: auto;
   transition: transform 0.5s ease;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5))
           drop-shadow(3px 3px 4px rgba(0, 0, 0, 0.4))
           drop-shadow(-3px -3px 4px rgba(0, 0, 0, 0.4));
@@ -238,6 +252,7 @@ body {
   cursor: pointer; /* Pointer cursor on hover */
   transition: transform 0.5s ease; /* Smooth transition */
   z-index: 999; /* Ensure it's on top */
+  
 }
 
 .back-btn:hover {

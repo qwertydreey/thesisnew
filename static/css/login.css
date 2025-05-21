@@ -47,6 +47,11 @@ body, html {
     z-index: 10;
     display: none; /* Hidden initially */
     opacity: 0; /* Hidden initially */
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
 }
 
 #second-image {
@@ -59,6 +64,11 @@ body, html {
     transition: opacity 1.8s ease;
     display: none; /* Hidden initially */
     opacity: 0; /* Hidden initially */
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
 }
 
 

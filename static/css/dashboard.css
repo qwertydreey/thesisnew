@@ -33,6 +33,11 @@ body {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain; /* Ensures it keeps aspect ratio while fitting */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 
@@ -55,6 +60,11 @@ body {
   box-shadow: none;
   cursor: pointer;
   transition: transform 0.5s ease;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 
   /* Shadow Border */
   filter: drop-shadow(0 0 5px rgba(255, 255, 150, 0.6))
@@ -69,10 +79,10 @@ body {
 
 .logout {
   position: absolute;
-  top: -7.9%;
-  left: 89.5%;
-  width: 9.5%;
-  height: 41.8%;
+  top: 12.1vh;
+  right: 1.5vh;
+  width: 20.5vh;
+  height: 7.8vh;
   background-image: url('../images/dshbrdimg/Logout.png');
 }
 .profile {

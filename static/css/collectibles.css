@@ -87,6 +87,11 @@ body {
   width: auto; /* Keeps badge image aspect ratio */
   height: 15vh;
   transition: opacity 0.3s, filter 0.3s; /* Smooth transition for grayscale/opacity */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Adjust positions of specific badges by using custom classes */
@@ -250,7 +255,11 @@ body {
 /* Skins Container */
 #skin-image {
   position: absolute;
-  /* Optional: Adjust this container if needed */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Skin 1 positioning */

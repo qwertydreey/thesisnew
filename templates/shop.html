@@ -122,20 +122,28 @@
             }
           
             let hasPlayedGreeting = false;
-          
+            let isGreetingPlaying = false; // NEW: to prevent overlap
+
             function playGreetingSound() {
               const sound = document.getElementById('greetings');
-          
-              // Only play if not already playing
-              if (sound.paused) {
-                sound.currentTime = 0;
-                sound.volume = 1;
-                sound.play().catch((e) => {
-                  console.error('Playback failed:', e);
-                });
-              }
+
+              // Prevent playing if already playing
+              if (!sound.paused || isGreetingPlaying) return;
+
+              isGreetingPlaying = true;
+              sound.currentTime = 0;
+              sound.volume = 0.5;
+
+              sound.play().catch((e) => {
+                console.error('Playback failed:', e);
+                isGreetingPlaying = false;
+              });
+
+              sound.onended = () => {
+                isGreetingPlaying = false;
+              };
             }
-          
+
             // Autoplay on first user interaction
             ['click', 'keydown', 'touchstart'].forEach(event => {
               document.addEventListener(event, () => {
@@ -145,11 +153,12 @@
                 }
               }, { once: true });
             });
-          
-            // Play again on button click or any call to this function
+
+            // For manual triggers
             function greetings() {
               playGreetingSound();
             }
+
           
             function counticus() {
               const sound = document.getElementById('counticus');
@@ -157,25 +166,35 @@
               // Only play if not already playing
               if (sound.paused) {
                 sound.currentTime = 0; // rewind to start
-                sound.volume = 1;
+                sound.volume = 0.5;
                 sound.play().catch((e) => {
                   console.error('Playback failed:', e);
                 });
               }
             }
           
+            let isFarewellPlaying = false;
+
             function farewell() {
               const sound = document.getElementById('farewell');
-          
-              // Only play if not already playing
-              if (sound.paused) {
-                sound.currentTime = 0; // rewind to start
-                sound.volume = 1;
+
+              if (!isFarewellPlaying) {
+                isFarewellPlaying = true;
+                sound.currentTime = 0;
+                sound.volume = 0.5;
+
                 sound.play().catch((e) => {
                   console.error('Playback failed:', e);
+                  isFarewellPlaying = false;  // reset flag if play fails
                 });
+
+                sound.onended = () => {
+                  isFarewellPlaying = false;  // reset flag after sound ends
+                };
               }
             }
+
+
           
             // NEW FUNCTION to stop all sounds immediately
             function stopAllSounds() {
@@ -203,6 +222,7 @@
             }
           </script>
           
+          <script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
 
           <script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 

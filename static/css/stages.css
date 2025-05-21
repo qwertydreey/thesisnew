@@ -37,6 +37,11 @@ body {
   object-fit: fill; /* Force stretching */
   z-index: -1;
   filter: blur(5px); /* Add blur effect with 10px radius, you can adjust this value */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 
@@ -51,6 +56,11 @@ body {
   background-repeat: no-repeat;
   z-index: 1;
   animation: smoothBungeeDrop 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; /* Bungee drop effect */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 @keyframes smoothBungeeDrop {
@@ -75,6 +85,11 @@ body {
   background-repeat: no-repeat;
   z-index: 4;
   transition: transform 0.4s ease; /* Smooth transition */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
   }
   .star:hover {
     transform: scale(1.02); /* Scale up on hover */
@@ -103,6 +118,11 @@ body {
     cursor: pointer; /* Pointer cursor on hover */
     transition: transform 0.2s ease; /* Smooth transition */
     z-index: 999; /* Ensure it's on top */
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
   }
   .back-btn:hover {
     transform: scale(1.02); /* Scale up on hover */
@@ -120,7 +140,8 @@ body {
   background-repeat: no-repeat;
   z-index: 3;
   transition: transform 0.3s ease;
-  transform-origin: center center; /* <<-- ITO ANG IMPORTANTE */
+  transform-origin: center center;
+  
 }
 .stage:hover {
   transform: scale(1.03); /* Scale up on hover */
@@ -129,6 +150,7 @@ body {
 .s1 {
   top: 46%;
   left: 33%;
+  
 }
 
 .s2 {

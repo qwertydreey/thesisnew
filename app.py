@@ -309,9 +309,7 @@ def monster_atlas():
 def logout():
     return redirect(url_for('login'))
 
-@app.route('/forgot-password')
-def forgot_password():
-    return render_template('forgot_password.html')
+
 
 @app.route('/game', methods=['GET'])
 def game():
@@ -356,14 +354,11 @@ def save_progress():
     existing_record = cursor.fetchone()
 
     if existing_record:
-        current_stars = existing_record['stars']
-        # Update stars only if new stars are greater than saved stars
-        if stars > current_stars:
-            cursor.execute("""
-                UPDATE user_progress 
-                SET stars = %s 
-                WHERE user_id = %s AND map_name = %s AND stage_number = %s
-            """, (stars, user_id, map_name, stage_number))
+        cursor.execute("""
+            UPDATE user_progress 
+            SET stars = %s 
+            WHERE user_id = %s AND map_name = %s AND stage_number = %s
+        """, (stars, user_id, map_name, stage_number))
     else:
         cursor.execute("""
             INSERT INTO user_progress (user_id, map_name, stage_number, stars) 
@@ -372,7 +367,8 @@ def save_progress():
 
     db.commit()
 
-    return jsonify({"message": "Progress saved successfully", "success": True}), 200
+    return jsonify({"message": "Progress saved successfully"}), 200
+
 
 
 

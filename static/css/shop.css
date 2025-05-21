@@ -35,6 +35,11 @@ html, body {
     height: 100vh;
     object-fit: fill; /* Force stretching */
     z-index: 0;
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
   }
   
   
@@ -57,11 +62,16 @@ html, body {
     box-shadow: none;
     cursor: pointer;
     transition: transform 0.5s ease;
-  
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
     /* Shadow Border */
     filter: drop-shadow(0 0 5px rgba(255, 255, 150, 0.6))
             drop-shadow(0 0 10px rgba(255, 255, 150, 0.4))
             drop-shadow(0 0 15px rgba(255, 255, 150, 0.2));
+  
   }
   
   /* Hover effect only when the button is clicked */
@@ -78,6 +88,11 @@ html, body {
     width: 22.5%;
     height: 46.8%;
     background-image: url('../images/shopimg/Shopkeeper.png');
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
   }
 
   .shopkeeper, .counticus {

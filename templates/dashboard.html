@@ -38,35 +38,35 @@
 
           <!-- ADVENTURE -->
           <div class="dashboard-btn-wrapper">
-            <a href="{{ url_for('roadmap') }}">
-              <button class="dashboard-btn adventure"onclick="playButtonClickSound()"></button>
+            <a href="{{ url_for('roadmap') }}" onclick="delayedRedirect(event, this.href)">
+              <button class="dashboard-btn adventure"></button>
             </a>
           </div>
-
 
           <!-- COLLECTIBLES -->
           <div class="dashboard-btn-wrapper">
-            <a href="{{ url_for('collectibles') }}">
-              <button class="dashboard-btn collections"onclick="playButtonClickSound()"></button>
+            <a href="{{ url_for('collectibles') }}" onclick="delayedRedirect(event, this.href)">
+              <button class="dashboard-btn collections"></button>
             </a>
           </div>
-
 
           <!-- MONSTER ATLAS -->
           <div class="dashboard-btn-wrapper">
-            <a href="{{ url_for('monster_atlas') }}">
-              <button class="dashboard-btn monsters"onclick="playButtonClickSound()"></button>
+            <a href="{{ url_for('monster_atlas') }}" onclick="delayedRedirect(event, this.href)">
+              <button class="dashboard-btn monsters"></button>
             </a>
           </div>
-
-
 
           <!-- SHOP -->
           <div class="dashboard-btn-wrapper">
-            <a href="{{ url_for('shop') }}">
-              <button class="dashboard-btn shop"onclick="playButtonClickSound()"></button>
+            <a href="{{ url_for('shop') }}" onclick="delayedRedirect(event, this.href)">
+              <button class="dashboard-btn shop"></button>
             </a>
           </div>
+
+
+
+
 
         <!-- SETTINGS -->
         <div class="dashboard-btn-wrapper">
@@ -140,6 +140,15 @@
     });
   }
 
+  function delayedRedirect(event, url) {
+    event.preventDefault(); // Stop immediate redirect
+    playButtonClickSound();
+
+    setTimeout(() => {
+      window.location.href = url;
+    }, 300); // Adjust delay as needed
+  }
+
   function autoResizeFont(element) {
   let fontSize = 4;
   element.style.fontSize = fontSize + 'vh';
@@ -157,6 +166,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+<script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
+
 <script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 
   

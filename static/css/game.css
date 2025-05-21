@@ -138,9 +138,16 @@ body {
   position: relative;
   z-index: 999;
   top:11vh;
+
 }
 
-
+.hp-bar-image{
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+}
 
 
 
@@ -316,6 +323,13 @@ body {
   z-index: 0; /* Keep it behind the game control box */
 }
 
+#platform-image{
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+}
 /* Example platform sizes and positions for different maps */
 .platform-multiplication {
   height: 30vh;
@@ -917,6 +931,11 @@ body {
   background-color: rgb(0 115 165);
   color: #ffffff; /* White text for contrast */
   box-shadow: 0px 2px 10px rgb(0 115 165);
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 #health-quantity {
@@ -925,6 +944,11 @@ body {
   background-color: #cd0000;
   color: #ffffff; /* White text for contrast */
   box-shadow: 0px 2px 10px #cd0000;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 #thunder-quantity {
@@ -933,6 +957,11 @@ body {
   background-color: rgb(236 152 2);
   color: #ffffff; /* Black text for contrast */
   box-shadow: 0px 2px 10px rgb(236 152 2);
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 
@@ -1276,6 +1305,11 @@ body {
   transition: opacity 0.1s ease; /* Smooth transition */
   z-index: 999; /* Ensures it's above other elements */
   image-rendering: pixelated; /* If it's pixel art */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .sprite-lightning.active {
@@ -1325,6 +1359,11 @@ body {
     padding-top: 100px; /* adjust distance from top */
     z-index: 9999; /* slightly lower than gameMenu */
     pointer-events: all;
+    user-select: none;
+    -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+    -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
   }
   /* Block clicks on overlay background but allow on menu */
   .menu-overlay::before {

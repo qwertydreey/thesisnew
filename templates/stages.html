@@ -12,7 +12,6 @@
 
 <body>
   <audio id="buttonClickSound" src="/static/sfx/click.mp3" preload="auto"></audio>
-  <audio id="loadingSFX" src="/static/sfx/loading.mp3" preload="auto"></audio>
 
   <div class="back">
     <a href="{{ url_for('roadmap') }}" onclick="delayedRoadmapBackRedirect(event)">
@@ -25,17 +24,17 @@
       <img src="{{ url_for('static', filename='images/stageimg/bg.png') }}" alt="stages" class="bg-img" />
     </div>
     <div class="map-img">
-      <div class="buttons">
-        <button class="stage s1" id="{{ selected_map }}-stage1">
-          <img src="{{ url_for('static', filename='images/stageimg/stage1.png') }}" alt="stage 1">
-        </button>
-        <button class="stage s2" id="{{ selected_map }}-stage2">
-          <img src="{{ url_for('static', filename='images/stageimg/stage2.png') }}" alt="stage 2">
-        </button>
-        <button class="stage s3" id="{{ selected_map }}-stage3">
-          <img src="{{ url_for('static', filename='images/stageimg/stage3.png') }}" alt="stage 3">
-        </button>
-      </div>
+        <div class="buttons">
+          <button class="stage s1" id="{{ selected_map }}-stage1">
+            <img src="{{ url_for('static', filename='images/stageimg/stage1.png') }}" alt="stage 1">
+          </button>
+          <button class="stage s2" id="{{ selected_map }}-stage2">
+            <img src="{{ url_for('static', filename='images/stageimg/stage2.png') }}" alt="stage 2">
+          </button>
+          <button class="stage s3" id="{{ selected_map }}-stage3">
+            <img src="{{ url_for('static', filename='images/stageimg/stage3.png') }}" alt="stage 3">
+          </button>
+        </div>
 
     
     
@@ -97,7 +96,7 @@
           topHalf.style.width = '100vw';
           topHalf.style.height = '50%';
           topHalf.style.objectFit = 'fill';
-          topHalf.style.transition = 'transform 4s ease';
+          topHalf.style.transition = 'transform 2s ease';
     
           const bottomHalf = document.createElement('img');
           bottomHalf.src = '/static/images/anim/loading/down.png';
@@ -107,21 +106,15 @@
           bottomHalf.style.width = '100vw';
           bottomHalf.style.height = '50%';
           bottomHalf.style.objectFit = 'fill';
-          bottomHalf.style.transition = 'transform 4s ease';
+          bottomHalf.style.transition = 'transform 2s ease';
     
           loadingOverlay.appendChild(topHalf);
           loadingOverlay.appendChild(bottomHalf);
           document.body.appendChild(loadingOverlay);
     
           // 🔊 Play loading SFX
-          const loadingSound = document.getElementById('loadingSFX');
-          if (loadingSound) {
-            loadingSound.currentTime = 0;
-            loadingSound.volume = 1; // Optional: adjust volume here
-            loadingSound.play().catch((e) => {
-              console.warn('Loading sound failed to play:', e);
-            });
-          }
+          window.playSound('/static/sfx/loading.mp3', 0); // 0ms delay
+
     
           // Animate after slight delay
           setTimeout(() => {
@@ -132,7 +125,7 @@
           // Navigate after animation
           setTimeout(() => {
             window.location.href = `/game?map=${selectedMap}&stage=${stageNumber}`;
-          }, 3900);
+          }, 2300);
         } else {
           alert('No map selected.');
         }
@@ -418,22 +411,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-</script>
-  
-<script>
   function delayedRoadmapBackRedirect(event) {
-    event.preventDefault(); // Prevent immediate redirect
-    playButtonClickSound(); // Play the button sound
-    const targetUrl = event.currentTarget.getAttribute('href');
+    playButtonClickSound(); // Play your sound
     setTimeout(() => {
-      window.location.href = targetUrl;
-    }, 400); // 400ms delay
+    }, 400); // Delay in ms
   }
 </script>
   
 
+<script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
 
 
+<script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 
 
 

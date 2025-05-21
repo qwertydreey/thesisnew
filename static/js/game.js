@@ -972,12 +972,7 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
     console.log("Spawn in progress, skipping spawn for now.");
   }
 
-  // === PROGRESS UPDATE ===
-  if (selectedMap && selectedStage) {
-    const starsEarned = 1;
-    updateStageProgress(selectedMap, selectedStage, starsEarned);
-    updateRoadmapStars(`${selectedMap}-${selectedStage}`);
-  }
+
 }
 
 
@@ -1386,6 +1381,13 @@ function showVictoryScreen() {
             .catch(err => console.error('Error checking reward:', err));
         })
         .catch(err => console.error('Error fetching stage reward:', err));
+
+          // === PROGRESS UPDATE ===
+  if (selectedMap && selectedStage) {
+    const starsEarned = 1;
+    updateStageProgress(selectedMap, selectedStage, starsEarned);
+    updateRoadmapStars(`${selectedMap}-${selectedStage}`);
+  }
 }
 
 

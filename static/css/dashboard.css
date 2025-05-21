@@ -239,5 +239,37 @@ body {
   background-image: url('../images/dshbrdimg/Shop.png');
 }
 
+#coming-soon-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#coming-soon-overlay p {
+  color: #fff;
+  font-size: 7vh;
+  font-weight: bold;
+  margin: 0;
+  opacity: 1;
+  animation: fadeOut 2s forwards;
+}
+
+.coming-soon-hidden {
+  display: none !important;  /* Force it to hide */
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 
 

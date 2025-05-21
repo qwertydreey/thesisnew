@@ -68,10 +68,17 @@
 
 
 
-        <!-- SETTINGS -->
-        <div class="dashboard-btn-wrapper">
-            <button class="dashboard-btn settings"onclick="playButtonClickSound()"></button>
-        </div>
+<!-- SETTINGS BUTTON -->
+<div class="dashboard-btn-wrapper">
+  <button class="dashboard-btn settings" onclick="showComingSoon(); playButtonClickSound()"></button>
+</div>
+
+<!-- COMING SOON OVERLAY -->
+<div id="coming-soon-overlay" class="coming-soon-hidden">
+  <p>Coming Soon</p>
+</div>
+      
+
 
       </div> <!-- .dashboard-buttons -->
     </div> <!-- .dashboard-content -->
@@ -79,8 +86,34 @@
 
 
   <script>
-
-    
+    function showComingSoon() {
+      const overlay = document.getElementById('coming-soon-overlay');
+      overlay.classList.remove('coming-soon-hidden');
+  
+      const text = overlay.querySelector('p');
+      text.style.animation = 'none'; // Reset animation
+      void text.offsetWidth;         // Trigger reflow
+      text.style.animation = 'fadeOut 2s forwards';
+  
+      setTimeout(() => {
+        overlay.classList.add('coming-soon-hidden');
+      }, 2000);
+    }
+  
+    function playButtonClickSound() {
+      const sound = document.getElementById('buttonClickSound');
+      if (sound) sound.play();
+    }
+  
+    // Ensure it's hidden when page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('coming-soon-overlay')?.classList.add('coming-soon-hidden');
+    });
+  </script>
+  
+  
+  <script>
+  
     const logoutBtn = document.getElementById('logoutBtn');
   
     if (logoutBtn) {

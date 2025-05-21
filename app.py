@@ -310,7 +310,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-
 @app.route('/game', methods=['GET'])
 def game():
     user_id = 1  # Hardcoded user ID

@@ -60,28 +60,43 @@ body {
 
 
 .nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 2rem;
-    background-color: rgba(0, 0, 0, 0.3);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    z-index: 3;
+  position: absolute;
+  top: 50%;
+  font-size: 8vh;
+  background-color: transparent;
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 3;
+  transform-origin: center;
 }
 
-/* Positioning based on context */
-.nav-btn.right {
-    right: 10vh;
-}
-
+/* Left button fixed rotation + move left-right */
 .nav-btn.left {
-    left: 5vh;
+  left: 4vh;
+  transform: translateY(-50%) rotate(30deg);
+  animation: moveSideways 1s ease-in-out infinite;
 }
+
+/* Right button fixed rotation + move left-right */
+.nav-btn.right {
+  right: 9vh;
+  transform: translateY(-50%) rotate(90deg);
+  animation: moveSideways 1s ease-in-out infinite;
+}
+
+@keyframes moveSideways {
+  0%, 100% {
+      transform: translateY(-50%) translateX(0);
+  }
+  50% {
+      transform: translateY(-50%) translateX(6px);
+  }
+}
+
+
+
 .badge-image {
   position: absolute;
   width: auto; /* Keeps badge image aspect ratio */

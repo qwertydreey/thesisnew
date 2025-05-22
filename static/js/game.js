@@ -896,6 +896,10 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
   const m = monstersInStage[idx];
   if (!m) return showVictoryScreen();
 
+  // Ensure folder is lowercase to match Linux file system
+  const safeFolder = folder.toLowerCase();
+  console.log(safeFolder); 
+
   // ✅ Check if this is the last monster (boss)
   const isFinalBoss = selectedStage === 3 && idx === monstersInStage.length - 1;
   if (isFinalBoss) {
@@ -906,7 +910,6 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
     playBossSFX();
   }
   
-
   currentMonsterHealth = m.maxHp;
   maxMonsterHealth = m.maxHp;
 
@@ -917,7 +920,7 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
     return;
   }
 
-  const monsterSrc = `/static/images/gameimg/mnstr/${folder}/${m.image}?t=${Date.now()}`;
+  const monsterSrc = `/static/images/gameimg/mnstr/${safeFolder}/${m.image}?t=${Date.now()}`;
   console.log("Monster image source:", monsterSrc);
 
   monsterImg.src = monsterSrc;
@@ -965,9 +968,8 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
   } else {
     console.log("Spawn in progress, skipping spawn for now.");
   }
-
-
 }
+
 
 
 

@@ -925,13 +925,15 @@ def update_equipped_skin():
 
 
 
+
 def get_db_connection():
     try:
         return mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="qweqwe",  # Replace this with your actual password
-            database="learning_game"
+            host=os.getenv("DB_HOST"),
+            port=int(os.getenv("DB_PORT", 3306)),  # optional default
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME")
         )
     except Exception as e:
         print(f"Error connecting to database: {e}")

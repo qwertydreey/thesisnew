@@ -83,7 +83,7 @@ body {
   right: 1.5vh;
   width: 20.5vh;
   height: 7.8vh;
-  background-image: url('../images/dshbrdimg/logout.png');
+  background-image: url('../images/dshbrdimg/Logout.png');
 }
 .profile {
   position: absolute;
@@ -91,7 +91,7 @@ body {
   left: 39%;
   width: 22.5%;
   height: 41.8%;
-  background-image: url('../images/dshbrdimg/profile.png');
+  background-image: url('../images/dshbrdimg/Profile.png');
   cursor: default;
   display: flex;
   justify-content: center;

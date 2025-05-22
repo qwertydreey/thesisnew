@@ -6,7 +6,7 @@ load_dotenv()
 import os
 import mysql.connector
 import openai
-
+import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this later
@@ -24,9 +24,6 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor(dictionary=True)
 
-# 🔥 OpenRouter Setup
-openai.api_base = "https://openrouter.ai/api/v1"
-openai.api_key = "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"  # ← Replace this with your OpenRouter API Key
 
 # --- Routes ---
 
@@ -161,76 +158,215 @@ def register():
 
 
 
-# ✅ CHATBOT API ROUTE
-user_question_status = {}
-user_last_question = {}
+# 🔥 OpenRouter Setup
+openai.api_base = "https://openrouter.ai/api/v1"
+openai.api_key = "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"  # ← Replace this with your OpenRouter API Key
+
+
+
+allowed_interactions = {
+    "hello", "hi", "hey", "good morning", "good afternoon", "good evening",
+    "thank you", "thanks", "ty", "ok", "okay", "yes", "no", "sure", "alright"
+}
+
+math_keywords = [
+    "add", "addition", "plus",
+    "subtract", "subtraction", "minus",
+    "multiply", "multiplication", "times",
+    "divide", "division",
+    "count", "number", "place value", "roman numeral", "compare",
+    "greater than", "less than", "equal",
+    "word problem", "how many", "left", "more", "fewer",
+    "counting forward", "skip counting", "counting backwards",
+    "borrowing", "regrouping", "long division",
+    "reading roman numerals", "converting roman numerals",
+    "ones", "tens", "hundreds", "thousands", "ten thousands"
+]
+
+yes_responses = {"yes", "yeah", "yep", "sure", "more help", "help"}
+no_responses = {"no", "nah", "nope", "stop"}
+
+def is_math_question(message: str) -> bool:
+    has_number = bool(re.search(r'\d', message))
+    has_keyword = any(k in message for k in math_keywords)
+    return has_number or has_keyword
+
+def compute_answer(question: str):
+    try:
+        numbers = list(map(float, re.findall(r'\d+', question)))
+        if len(numbers) < 2:
+            return None
+
+        if any(op in question for op in ["add", "plus", "+"]):
+            return int(numbers[0] + numbers[1])
+        elif any(op in question for op in ["subtract", "minus", "-"]):
+            return int(numbers[0] - numbers[1])
+        elif any(op in question for op in ["multiply", "times", "*"]):
+            return int(numbers[0] * numbers[1])
+        elif any(op in question for op in ["divide", "division", "/"]):
+            if numbers[1] == 0:
+                return None
+            return int(numbers[0] / numbers[1])
+        else:
+            return None
+    except:
+        return None
+
+def check_answer(user_answer: str, expected_answer) -> bool:
+    try:
+        return int(user_answer) == int(expected_answer)
+    except:
+        return False
 
 @app.route('/chatbot-api', methods=['POST'])
 def chatbot_api():
-    try:
-        user_message = request.json['message'].strip().lower()
+    data = request.json
+    user_message = data.get("message", "").strip().lower()
 
-        # For simplicity, assuming one global user — if you're using logins, use session/user_id keys
-        global_user_id = "default_user"
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
 
-        # Initialize user state if not yet present
-        if global_user_id not in user_last_question:
-            user_last_question[global_user_id] = None
+    # Initialize session variables if missing
+    if 'last_question' not in session:
+        session['last_question'] = ""
+    if 'step' not in session:
+        session['step'] = 0
+    if 'expected_answer' not in session:
+        session['expected_answer'] = None
 
-        follow_ups = [
-            "i don't know", "can you help", "i still don't get it", 
-            "i need help", "what now", "i’m confused", "i dont know"
-        ]
+    # Step 0: Greeting or math question detection
+    if session['step'] == 0:
+        if user_message in allowed_interactions:
+            friendly_responses = {
+                "hello": "Hello! I'm Counticus, your friendly math helper!",
+                "hi": "Hi there! Ready to do some math?",
+                "hey": "Hey! I'm here if you need help with math.",
+                "good morning": "Good morning! I'm here to help with math problems.",
+                "good afternoon": "Good afternoon! Ready to learn some math?",
+                "good evening": "Good evening! Counticus at your service!",
+                "thank you": "You're welcome!",
+                "thanks": "No problem!",
+                "ty": "You're welcome!",
+                "ok": "Okay!",
+                "okay": "Okay!",
+                "sure": "Okay! Just send me a math question when you're ready.",
+                "alright": "Alright! I'm here when you need help."
+            }
+            return jsonify({"reply": friendly_responses.get(user_message, "I'm here to help with math!")})
 
-        # Check if it's a follow-up
-        if user_message in follow_ups and user_last_question[global_user_id]:
-            # It's a follow-up to a previous question
-            original_question = user_last_question[global_user_id]
-            user_message = original_question
-            asked_before = True
+        if not is_math_question(user_message):
+            return jsonify({"reply": "Sorry, I can only help with math questions or respond to simple greetings!"})
+
+        # Save question and expected answer, then move to step 1
+        session['last_question'] = user_message
+        session['expected_answer'] = compute_answer(user_message)
+        session['step'] = 1
+
+    # Step 1: Give simple tip and ask if user wants more help
+    if session['step'] == 1:
+        if user_message in yes_responses:
+            session['step'] = 2
+        elif user_message in no_responses:
+            session['step'] = 0
+            session['last_question'] = ""
+            session['expected_answer'] = None
+            return jsonify({"reply": "Alright! Let me know if you have another math question."})
         else:
-            # New question
-            original_question = user_message
-            asked_before = user_question_status.get(user_message, False)
-            user_last_question[global_user_id] = user_message  # Remember this as the last question
+            # Generate tip from OpenAI
+            tip_prompt = f"Give a simple tip to solve this math problem without giving the answer: '{session['last_question']}'. End by asking: 'Would you like more help?' Keep it short and friendly for Grade 1."
+            try:
+                system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
+                response = openai.ChatCompletion.create(
+                    model="mistralai/mistral-7b-instruct:free",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": tip_prompt}
+                    ]
+                )
+                reply = response['choices'][0]['message']['content']
+                return jsonify({"reply": reply})
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
 
-        # Set the prompt based on whether it’s the first or second time asking
-        if asked_before:
-            prompt = (
-                "You are Counticus, a kind and friendly math wizard who loves helping little kids learn math. "
-                "Pretend you are talking to a Grade 1 student, so use very simple words and speak slowly and gently. "
-                "When a child asks the same math question again, it means they want more help. So now, explain the steps one by one, like you’re guiding them. "
-                "Use easy words and make each step clear. Then, give the final answer at the end. "
-                "Be very patient and speak like a caring teacher. Example: 'First, we take 3 apples... then we add 2 more... so now we have...?'"
+    # Step 2: Provide step-by-step solution without final answer, then ask for user's answer
+    if session['step'] == 2:
+        step_prompt = f"Give a step-by-step solution without the final answer for this math problem: '{session['last_question']}'. Then ask: 'What do you think the answer is?' Keep it short and friendly for Grade 1."
+        try:
+            system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
+            response = openai.ChatCompletion.create(
+                model="mistralai/mistral-7b-instruct:free",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": step_prompt}
+                ]
             )
-        else:
-            prompt = (
-                "You are Counticus, a kind and friendly math wizard who loves helping little kids learn math. "
-                "Pretend you are talking to a Grade 1 student, so use very simple words and speak slowly and gently. "
-                "When a child asks a math question for the first time, don’t give the final answer. Instead, give helpful hints, like clues, or tell them how they can start solving it. "
-                "Be patient and cheerful, like a teacher who’s very good with kids. Example: 'Hmm, let’s try counting together!' or 'Can you think of what comes after 5?'"
-            )
+            reply = response['choices'][0]['message']['content']
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
-        # Make the OpenAI API call
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": user_message}
-            ]
-        )
-
-        # Get the reply
-        reply = response['choices'][0]['message']['content'].strip()
-
-        # Mark that this question has now been asked
-        user_question_status[original_question] = True
-
+        session['step'] = 2.5
         return jsonify({"reply": reply})
 
-    except Exception as e:
-        print("❌ Chatbot Error:", e)
-        return jsonify({"reply": "Oops! Counticus couldn’t reach the magic scrolls. Try again later."})
+    # Step 2.5: Check user's answer, if correct reset else ask if want full explanation
+    if session['step'] == 2.5:
+        expected = session.get('expected_answer')
+        if expected is None:
+            # If we can't compute expected answer, skip to step 3
+            session['step'] = 3
+        else:
+            if check_answer(user_message, expected):
+                session['step'] = 0
+                session['last_question'] = ""
+                session['expected_answer'] = None
+                return jsonify({"reply": "That's correct! Great job! 🎉 Let me know if you want to try another question."})
+            else:
+                session['step'] = 3
+                return jsonify({"reply": "That's not quite right. Would you like me to explain the full solution?"})
+
+    # Step 3: Give full solution with final answer or end
+    if session['step'] == 3:
+        if user_message in yes_responses:
+            full_prompt = f"Give a full step-by-step solution including the final answer for this math problem: '{session['last_question']}'. Keep it short and friendly for Grade 1."
+            try:
+                system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": full_prompt}
+                    ]
+                )
+                reply = response['choices'][0]['message']['content']
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+            session['step'] = 0
+            session['last_question'] = ""
+            session['expected_answer'] = None
+            return jsonify({"reply": reply})
+
+        elif user_message in no_responses:
+            session['step'] = 0
+            session['last_question'] = ""
+            session['expected_answer'] = None
+            return jsonify({"reply": "Okay! Feel free to ask me another math question anytime."})
+
+        else:
+            return jsonify({"reply": "Sorry, your answer is not valid please reply with 'yes' or 'no' if you want the full explanation."})
+
+    # Default fallback
+    return jsonify({"reply": "Sorry, I didn't understand that. Please ask a math question or say hello!"})
+
+
+
+
+@app.route('/reset-chat-session', methods=['POST'])
+def reset_chat_session():
+    session.pop('last_question', None)
+    session.pop('step', None)
+    session.pop('expected_answer', None)
+    return jsonify({"message": "Chat session reset"})
+
 
 
 @app.route('/chatbot')

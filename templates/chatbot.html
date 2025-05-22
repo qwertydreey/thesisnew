@@ -83,7 +83,7 @@
       <!-- Messages appear here -->
     </div>
     <form id="chat-form" class="d-flex mt-2">
-      <input type="text" class="form-control me-2" id="user-input" placeholder="Type your message...">
+      <textarea class="form-control me-2" id="user-input" placeholder="Type your message..." rows="1" style="resize: none;"></textarea>
       <button type="submit" class="btn btn-success">Send</button>
     </form>
     
@@ -133,6 +133,8 @@
         // Clear sessionStorage chat only if it's reload
         if (isReload) {
             sessionStorage.removeItem('chatMessages');
+            fetch('/reset-chat-session', { method: 'POST' });
+
         }
     
         // Load saved messages or start with empty array
@@ -223,8 +225,9 @@
             bubble.classList.add('message-bubble');
     
             const messageText = document.createElement('span');
-            messageText.textContent = message;
-    
+            messageText.innerHTML = message.replace(/\n/g, '<br>');
+            messageText.style.whiteSpace = 'pre-line';
+
             bubble.appendChild(messageText);
     
             if (sender === 'bot') {
@@ -271,8 +274,15 @@
     
             return row;
         }
-    
-        form.addEventListener('submit', async function(e) {
+        input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.requestSubmit(); // Manually trigger form submission
+    }
+});
+
+form.addEventListener('submit', async function(e) {
+
             e.preventDefault();
     
             const userText = input.value.trim();
@@ -329,6 +339,7 @@
 
   // Clear sessionStorage
   sessionStorage.removeItem('chatMessages');
+  fetch('/reset-chat-session', { method: 'POST' });
 
   // Clear the chat box UI
   chatBox.innerHTML = '';
@@ -339,11 +350,22 @@
   }
 }
 
+async function resetBackendSession() {
+    await fetch('/reset-chat-session', { method: 'POST' });
+    // Clear local sessionStorage too
+    sessionStorage.removeItem('chatMessages');
+    messages.length = 0;
+    renderMessages();
+}
+
+
     </script>
     
 
 
 <script>
+
+  
     let hasPlayedCounticus = false;
   
     function counticushelp() {

@@ -85,10 +85,10 @@ body {
   background-image: url('../images/dshbrdimg/Logout2.png');
 }
 .profile {
-  top: 54.2%;
+  top: 60.2%;
   left: 39%;
   width: 22.5%;
-  height: 41.8%;
+  height: 27.8%;
   background-image: url('../images/dshbrdimg/Profile1.png');
   cursor: default;
   display: flex;
@@ -103,7 +103,7 @@ body {
   font-weight: 700;
   font-family: "FSP DEMO - Merlo Neue Bold";
   position: absolute;
-  top: 12.3vh;
+  top: 3.3vh;
   left: 6.4vh;
 
   width: 35vh;    /* Width fixed */
@@ -144,7 +144,7 @@ body {
   text-align: left;
   font-family: "FSP DEMO - Merlo Neue Bold";
   position: absolute;
-  top: 18.5vh;
+  top: 9.5vh;
   left: 6.4vh;
   width: 35vh;
   max-width: 35vh;
@@ -169,7 +169,7 @@ body {
   text-align: left;
   font-family: "FSP DEMO - Merlo Neue Bold";
   position: absolute;
-  top: 21vh;
+  top: 12vh;
   left: 6.4vh;
   width: 35vh;
   max-width: 35vh;

@@ -79,7 +79,8 @@ body, html {
     height: 38vh;
     width: 56vh;
     top: 45vh;
-    left: 78vh;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 20;
     display: none; /* Hidden initially */
 

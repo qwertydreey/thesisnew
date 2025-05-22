@@ -182,9 +182,7 @@ html, body {
     width: fit-content;
     height: auto;
     max-height: 19vh; /* Limit height to 10% of viewport height */
-    font-weight: bold;
     color: #5B3A29;
-    font-size: clamp(1rem, 4vw, 2rem); /* Use clamp to make the font size responsive */
     word-wrap: break-word;
     transform: translate(-50%, -50%);
     opacity: 0;
@@ -201,20 +199,21 @@ html, body {
 .speech-bubble::after {
   content: '';
   position: absolute;
+
   top: 85%;
   right: -3.03vh;
   width: 0;
   height: 0;
-  border-top: 12px solid transparent;
-  border-left: 35px solid #fef3c7;
-  border-bottom: 14px solid transparent;
+  border-top: 1.2vh solid transparent;
+  border-left: 3.5vh solid #fef3c7;
+  border-bottom: 1.4vh solid transparent;
   transform: translateY(-50%);
 }
 
 /* Title styling */
 .speech-bubble h2 {
     margin: 0;
-    font-size: 2.5vh;
+    font-size: 2.1vh;
     text-align: center;
     font-weight: 800;
 }
@@ -225,8 +224,8 @@ html, body {
 .freeze-title { color: #53cbe5; }
 
 .speech-bubble p {
-    margin-top: 0.5rem;
-    font-size: 2vh;
+    margin-top: 0.5vh;
+    font-size: 1.8vh;
     text-align: justify;
     line-height: 1.4;
     font-weight: 600;

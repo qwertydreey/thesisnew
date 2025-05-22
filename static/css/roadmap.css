@@ -43,8 +43,8 @@ body {
   -ms-user-select: none; /* IE/Edge */
 }
 
-/* Generic button styling (acts like cutout image) */
-.roadmap-btn {
+
+  .roadmap-btn {
   position: absolute;
   background: transparent center/contain no-repeat;
   border: none;

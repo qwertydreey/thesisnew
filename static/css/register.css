@@ -25,7 +25,8 @@ body {
     background-repeat: no-repeat;
     position: absolute;
     top: 7vh;
-    left: 72vh;
+    left: 50%;
+    transform: translateX(-50%);
     width: 62vh;
     height: 85vh;
     z-index: 1;

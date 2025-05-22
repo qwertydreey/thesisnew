@@ -3,8 +3,7 @@
 
 /* Ensure body and html take full height and prevent scrolling */
 html, body {
-    height: 100%;
-    width: 100%;
+    padding: 0;
     margin: 0;
     overflow: hidden;
 }
@@ -28,7 +27,8 @@ html, body {
     width: auto;
     height: 75vh;
     top: 25vh;
-    left: 49vh;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: -2;
 }   
 .scroll{
@@ -36,7 +36,8 @@ html, body {
     width: auto;
     height: 53vh;
     top: 38vh;
-    left: 70vh;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: -1;
 } 
 .map-btn {
@@ -71,7 +72,7 @@ html, body {
     width: auto;
     height: 26vh;
     top: 37.1vh;
-    left: 0vw;
+    left: 0;
     z-index: 4;
   }
   
@@ -79,7 +80,7 @@ html, body {
     width: auto;
     height: 22.1vh;
     top: 51.3vh;
-    left: 0vw;
+    left: 0;
     z-index: 3;
 
   }
@@ -88,7 +89,7 @@ html, body {
     width: auto;
     height: 22vh;
     top: 61.2vh;
-    left: 0vw;
+    left: 0;
     z-index: 2;
 
   }
@@ -97,7 +98,7 @@ html, body {
     width: auto;
     height: 21vh;
     top: 72.2vh;
-    left: 0vw;
+    left: 0;
     z-index: 1;
   }
   
@@ -105,7 +106,7 @@ html, body {
     width: auto;
     height: 22.3vh;
     top: 43.9vh;
-    right: 0vw;
+    right: 0;
     z-index: 4;
 
   }
@@ -114,7 +115,7 @@ html, body {
     width: auto;
     height: 19.5vh;
     top: 56.7vh;
-    right: 0vw;
+    right: 0;
     z-index: 3;
 
   }
@@ -123,7 +124,7 @@ html, body {
     width: auto;
     height: 20vh;
     top: 66.3vh;
-    right: 0vw;
+    right: 0;
     z-index: 2;
 
   }
@@ -132,7 +133,7 @@ html, body {
     width: auto;
     height: 19.4vh;
     top: 75.6vh;
-    right: 0vw;
+    right: 0;
     z-index: 1;
 
   }
@@ -142,7 +143,7 @@ html, body {
     width: auto;
     height: 72vh;
     bottom: 0vh;
-    left: 0vw;
+    left: 0;
     z-index: -1;
   }
 
@@ -151,7 +152,7 @@ html, body {
     width: auto;
     height: 63.4vh;
     bottom: 0vh;
-    right: 0vw;
+    right: 0;
     z-index: -1;
   }
 
@@ -161,7 +162,8 @@ html, body {
     position: absolute;
     width: 45vh;
     height: 21vh;
-    left: 85.8vh;
+    left: 50%;
+    transform: translateX(-50%);
     top: 54vh;
     display: flex;
     flex-direction: column;
@@ -204,7 +206,8 @@ html, body {
 }
 #monster-track {
     position: absolute;
-    left: 106vh;
+    left: 50%;
+    transform: translateX(-50%);    
     top: 73vh;
     color: #ffffff;
     font-size: 1.5vh;
@@ -233,9 +236,10 @@ html, body {
 .monster-container {
     position: absolute;
     top: 3vh;
-    left: 77vh;
+    left: 50%;
+    transform: translateX(-50%);
     height: 47vh;
-    width: 60vh;
+    width: 34vw;
     z-index: -1;
 }
 
@@ -326,7 +330,8 @@ filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8)) /* Stronger shadow with higher o
 #monster-navigation {
     position: absolute; /* Absolute positioning within the #monster-container */
     top: 61vh;
-    left: 60.2vh;
+    left: 50%;
+    transform: translateX(-50%); /* Center the navigation buttons */
     display: flex;
     justify-content: center;
     gap: 76vh;/* Adjust gap between buttons */
@@ -360,7 +365,6 @@ filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8)) /* Stronger shadow with higher o
     justify-content: center;
     cursor: pointer;
     border: none; /* Remove any default borders */
-    border-radius: 50%; /* Make the buttons round */
     background-color: transparent; /* Ensure the background is transparent */
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6))
     drop-shadow(3px 3px 4px rgba(0, 0, 0, 0.4))

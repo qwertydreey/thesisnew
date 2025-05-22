@@ -652,22 +652,22 @@ const mapStages = {
   },
   placevalue: {
     1: [
-      { name: 'PlaceValue-Mob-1', displayName: "CROP CRUSHER", maxHp: 3, image: 'PlaceValue-Mob-1.png' },
-      { name: 'PlaceValue-Mob-2', displayName: "BARNHOG BEAST", maxHp: 5, image: 'PlaceValue-Mob-2.png' },
-      { name: 'PlaceValue-Mob-3', displayName: "SHEEP TRIO", maxHp: 5, image: 'PlaceValue-Mob-3.png' },
-      { name: 'PlaceValue-Boss-1', displayName: "THE CORNFIELD SENTINEL", maxHp: 7, image: 'PlaceValue-Boss-1.png' }
+      { name: 'PlaceValue-Mob-1', displayName: "CROP CRUSHER", maxHp: 3, image: 'Placevalue-Mob-1.png' },
+      { name: 'PlaceValue-Mob-2', displayName: "BARNHOG BEAST", maxHp: 5, image: 'Placevalue-Mob-2.png' },
+      { name: 'PlaceValue-Mob-3', displayName: "SHEEP TRIO", maxHp: 5, image: 'Placevalue-Mob-3.png' },
+      { name: 'PlaceValue-Boss-1', displayName: "THE CORNFIELD SENTINEL", maxHp: 7, image: 'Placevalue-Boss-1.png' }
     ],
     2: [
-      { name: 'PlaceValue-Mob-4', displayName: "WOLFSTORM", maxHp: 3, image: 'PlaceValue-Mob-4.png' },
-      { name: 'PlaceValue-Mob-5', displayName: "INFERNO HORSE", maxHp: 4, image: 'PlaceValue-Mob-5.png' },
-      { name: 'PlaceValue-Mob-6', displayName: "RAGING TUSK", maxHp: 5, image: 'PlaceValue-Mob-6.png' },
-      { name: 'PlaceValue-Boss-2', displayName: "THE WINDMILL HAVEN", maxHp: 7, image: 'PlaceValue-Boss-2.png' }
+      { name: 'PlaceValue-Mob-4', displayName: "WOLFSTORM", maxHp: 3, image: 'Placevalue-Mob-4.png' },
+      { name: 'PlaceValue-Mob-5', displayName: "INFERNO HORSE", maxHp: 4, image: 'Placevalue-Mob-5.png' },
+      { name: 'PlaceValue-Mob-6', displayName: "RAGING TUSK", maxHp: 5, image: 'Placevalue-Mob-6.png' },
+      { name: 'PlaceValue-Boss-2', displayName: "THE WINDMILL HAVEN", maxHp: 7, image: 'Placevalue-Boss-2.png' }
     ],
     3: [
-      { name: 'PlaceValue-Mob-7', displayName: "MUDHAVEN BEAST", maxHp: 4, image: 'PlaceValue-Mob-7.png' },
-      { name: 'PlaceValue-Mob-8', displayName: "FALLOW SENTRY", maxHp: 6, image: 'PlaceValue-Mob-8.png' },
-      { name: 'PlaceValue-Mob-9', displayName: "HARVEST SCARECROW", maxHp: 5, image: 'PlaceValue-Mob-9.png' },
-      { name: 'PlaceValue-Boss-3', displayName: "THE CINDERSCORCH", maxHp: 7, image: 'PlaceValue-Boss-3.png' }
+      { name: 'PlaceValue-Mob-7', displayName: "MUDHAVEN BEAST", maxHp: 4, image: 'Placevalue-Mob-7.png' },
+      { name: 'PlaceValue-Mob-8', displayName: "FALLOW SENTRY", maxHp: 6, image: 'Placevalue-Mob-8.png' },
+      { name: 'PlaceValue-Mob-9', displayName: "HARVEST SCARECROW", maxHp: 5, image: 'Placevalue-Mob-9.png' },
+      { name: 'PlaceValue-Boss-3', displayName: "THE CINDERSCORCH", maxHp: 7, image: 'Placevalue-Boss-3.png' }
     ]
   }
 };

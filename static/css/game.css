@@ -822,6 +822,11 @@ body {
   bottom: 0; /* Stick it to the bottom of the parent container */
   left: -5vh; /* Move it 5% from the left side of the screen */
   gap: 1vw; /* Space out potion items */
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* ========== POTION ITEM ========== */
@@ -833,6 +838,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* ========== POTION IMAGES ========== */
@@ -1544,6 +1554,10 @@ body {
   width: 10vh;
   height: 5vh;
   user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 
@@ -1589,7 +1603,11 @@ body {
   display: flex;
   align-items: center;
   gap: 1vh;
-
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Mute Checkbox Style */
@@ -1603,6 +1621,11 @@ body {
   position: absolute;
   cursor: pointer;
   z-index: 10;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Show mute icon when checked */
@@ -1626,6 +1649,11 @@ body {
   width: 13vh;
   height: 3vh;
   user-select: none;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* === SFX Volume Range === */
@@ -1639,6 +1667,7 @@ body {
   background-size: 100% 100%;
   outline: none;
   position: absolute;
+  
 }
 
 .sfx-volume-icon {
@@ -1651,6 +1680,11 @@ body {
   width: 12vh;
   height: 5vh;
   user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+  
 }
 /* === Customized Thumb (Chrome, Safari) === */
 #sfx-volume::-webkit-slider-thumb {
@@ -1731,6 +1765,11 @@ body {
   width: 13vh;
   height: 3vh;
   user-select: none;
+  user-select: none;
+  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
+  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Buttons Section */

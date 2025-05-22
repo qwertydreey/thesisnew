@@ -512,10 +512,10 @@ const mapPlatforms = {
 const mapStages = {
   multiplication: {
     1: [
-      { name: 'Multiplication-Mob-1', displayName: "OASIS OGRES", maxHp: 1, image: 'Multiplication-Mob-1.png' },
-      { name: 'Multiplication-Mob-2', displayName: "PRODUCT PIRANHAS", maxHp: 1, image: 'Multiplication-Mob-2.png' },//3
-      { name: 'Multiplication-Mob-3', displayName: "MULTIPLEX MONKEY", maxHp: 1, image: 'Multiplication-Mob-3.png' },//4
-      { name: 'Multiplication-Boss-1', displayName: "THE PRODUCT GOLEM", maxHp: 1, image: 'Multiplication-Boss-1.1.png' }//5
+      { name: 'Multiplication-Mob-1', displayName: "OASIS OGRES", maxHp: 1, image: 'Multiplication-Mob-1.png' },//3
+      { name: 'Multiplication-Mob-2', displayName: "PRODUCT PIRANHAS", maxHp: 1, image: 'Multiplication-Mob-2.png' },//5
+      { name: 'Multiplication-Mob-3', displayName: "MULTIPLEX MONKEY", maxHp: 1, image: 'Multiplication-Mob-3.png' },//6
+      { name: 'Multiplication-Boss-1', displayName: "THE PRODUCT GOLEM", maxHp: 1, image: 'Multiplication-Boss-1.1.png' }//7
     ],
     2: [
       { name: 'Multiplication-Mob-4', displayName: "TIME TURTLE", maxHp: 2, image: 'Multiplication-Mob-4.png' },
@@ -1870,7 +1870,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // Potion counts
 let healthPotions = 1;
-let thunderPotions = Infinity;
+let thunderPotions = Infinity; // THUNDER POTION QUANTITY SET
 let freezePotions = 3;
 
 let isMonsterSpawnAnimationInProgress = false;

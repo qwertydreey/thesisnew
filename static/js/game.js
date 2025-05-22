@@ -515,19 +515,19 @@ const mapStages = {
       { name: 'Multiplication-Mob-1', displayName: "OASIS OGRES", maxHp: 1, image: 'Multiplication-Mob-1.png' },
       { name: 'Multiplication-Mob-2', displayName: "PRODUCT PIRANHAS", maxHp: 1, image: 'Multiplication-Mob-2.png' },//3
       { name: 'Multiplication-Mob-3', displayName: "MULTIPLEX MONKEY", maxHp: 1, image: 'Multiplication-Mob-3.png' },//4
-      { name: 'Multiplication-Boss-1', displayName: "THE PRODUCT GOLEM", maxHp: 1, image: 'Multiplication-boss-1.png' }//5
+      { name: 'Multiplication-Boss-1', displayName: "THE PRODUCT GOLEM", maxHp: 1, image: 'Multiplication-Boss-1.1.png' }//5
     ],
     2: [
       { name: 'Multiplication-Mob-4', displayName: "TIME TURTLE", maxHp: 2, image: 'Multiplication-Mob-4.png' },
       { name: 'Multiplication-Mob-5', displayName: "SERPENT SOLVER", maxHp: 4, image: 'Multiplication-Mob-5.png' },
       { name: 'Multiplication-Mob-6', displayName: "CRUNCH CROCODILE", maxHp: 5, image: 'Multiplication-Mob-6.png' },
-      { name: 'Multiplication-Boss-2', displayName: "THE MULTI REX", maxHp: 7, image: 'Multiplication-boss-2.png' }
+      { name: 'Multiplication-Boss-2', displayName: "THE MULTI REX", maxHp: 7, image: 'Multiplication-Boss-2.2.png' }
     ],
     3: [
       { name: 'Multiplication-Mob-7', displayName: "ECHO ELEPANT", maxHp: 2, image: 'Multiplication-Mob-7.png' },
       { name: 'Multiplication-Mob-8', displayName: "MULTI MAGPIE", maxHp: 4, image: 'Multiplication-Mob-8.png' },
       { name: 'Multiplication-Mob-9', displayName: "WHIRL WHALE", maxHp: 6, image: 'Multiplication-Mob-9.png' },
-      { name: 'Multiplication-Boss-3', displayName: "THE EQUATION BEAST", maxHp: 7, image: 'Multiplication-boss-3.png' }
+      { name: 'Multiplication-Boss-3', displayName: "THE EQUATION BEAST", maxHp: 7, image: 'Multiplication-Boss-3.3.png' }
     ]
   },
   division: {

@@ -204,7 +204,7 @@ const questions = {
         { question_text: 'A factory makes 60 items every hour. How many items will it make in 14 hours?', correct_answer: '840' },
         { question_text: 'A book has 120 pages. How many pages are there in 15 books?', correct_answer: '1800' },
         { question_text: 'A bus carries 45 passengers. How many passengers can 10 buses carry?', correct_answer: '450' },
-        { question_text: 'A soccer team has 22 players. How many legs do all the players have?', correct_answer: '88' },
+        { question_text: 'A soccer team has 22 players. How many legs do all the players have?', correct_answer: '44' },
         { question_text: 'A construction worker lays 75 bricks every day. How many bricks will he lay in 40 days?', correct_answer: '3000' },
         { question_text: 'A box contains 250 pieces of candy. How many pieces of candy are there in 30 boxes?', correct_answer: '7500' },
         { question_text: 'A garden has 30 rows of flowers. Each row has 50 flowers. How many flowers are there in total?', correct_answer: '1500' },

@@ -221,3 +221,32 @@ button[type="submit"]:hover {
     transform: scale(1.02);
 
 }
+
+.flash-container {
+    position: fixed;
+    top: 0%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: auto;
+    max-width: 90%;
+    text-align: center;
+  }
+  
+  .flash {
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  .flash-success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .flash-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  

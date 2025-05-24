@@ -77,9 +77,9 @@ def get_user_from_db():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
+        username = request.form['username'].strip()
+        first_name = request.form['first_name'].strip()
+        last_name = request.form['last_name'].strip()
         birth_day = request.form['birth_day']
         birth_month = request.form['birth_month']
         birth_year = request.form['birth_year']
@@ -87,6 +87,17 @@ def register():
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
+        # Validate minimum username length
+        if len(username) < 3:
+            flash('Username must be at least 3 characters.', 'danger')
+            return redirect(url_for('register'))
+
+        # Validate minimum password length
+        if len(password) < 6:
+            flash('Password must be at least 6 characters.', 'danger')
+            return redirect(url_for('register'))
+
+        # Check password match
         if password != confirm_password:
             flash('Passwords do not match!', 'danger')
             return redirect(url_for('register'))
@@ -144,7 +155,7 @@ def register():
             cursor.close()
 
             flash('Registration successful! You can now log in.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('register'))
 
         except Exception as e:
             db.rollback()
@@ -239,7 +250,7 @@ def chatbot_api():
         if user_message in allowed_interactions:
             friendly_responses = {
                 "hello": "Hello! I'm Counticus, your friendly math helper!",
-                "hi": "Hi there! Ready to do some math?",
+                "hi": "Hello! I'm Counticus, your friendly math helper!",
                 "hey": "Hey! I'm here if you need help with math.",
                 "good morning": "Good morning! I'm here to help with math problems.",
                 "good afternoon": "Good afternoon! Ready to learn some math?",

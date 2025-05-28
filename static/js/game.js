@@ -366,7 +366,7 @@ async function handleAttack() {
   // === RESET COUNTERS AND UPDATE DIFFICULTY IF 10 ANSWERS ===
   if (totalQuestionsAnswered >= 10) {
     currentDifficulty = evaluateDifficulty(correctAnswersCount, totalQuestionsAnswered);
-    updateDifficulty();
+    updateDifficultyDisplay();
 
     console.log("🔁 Resetting counters after 10 answers...");
     await resetCounters(); // ✅ Backend reset

@@ -19,7 +19,6 @@
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
   });
 
-  // Main message
   const message = document.createElement('div');
   message.textContent = '🔄 Please rotate your phone to landscape mode to continue.';
   Object.assign(message.style, {
@@ -37,7 +36,6 @@
 
   overlay.appendChild(message);
 
-  // Fullscreen button (only if supported)
   if ('orientation' in screen && screen.orientation.lock && document.documentElement.requestFullscreen) {
     const fullscreenBtn = document.createElement('button');
     fullscreenBtn.textContent = '🔳 Enter Fullscreen & Rotate';
@@ -56,6 +54,8 @@
       try {
         await document.documentElement.requestFullscreen();
         await screen.orientation.lock('landscape');
+        sessionStorage.setItem('fullscreenMode', 'true'); // ✅ remember
+        overlay.style.display = 'none';
       } catch (err) {
         alert('Could not enter fullscreen or lock orientation: ' + err.message);
       }
@@ -63,7 +63,6 @@
 
     overlay.appendChild(fullscreenBtn);
   } else {
-    // Fallback message for iOS or unsupported
     const fallbackNote = document.createElement('div');
     fallbackNote.textContent = '📱 If nothing happens, please rotate manually to landscape.';
     fallbackNote.style.color = '#bbb';
@@ -75,7 +74,12 @@
   document.body.appendChild(overlay);
 
   function checkOrientation() {
-    if (window.innerHeight > window.innerWidth) {
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const isFullscreen = !!document.fullscreenElement || window.innerHeight === screen.height;
+
+    const hasFullscreenFlag = sessionStorage.getItem('fullscreenMode') === 'true';
+
+    if (isPortrait && !hasFullscreenFlag) {
       overlay.style.display = 'flex';
     } else {
       overlay.style.display = 'none';

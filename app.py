@@ -444,7 +444,7 @@ def chatbot_api():
                 return jsonify({"reply": "That's correct! Great job! 🎉 Let me know if you want to try another question."})
             else:
                 session['step'] = 3
-                return jsonify({"reply": "That's not quite right. Would you like me to explain the full solution?"})
+                return jsonify({"reply": "That's not quite right. Would you like me to explain the full solution?\n\n👇 Please answer YES or NO 👇"})
 
     if session['step'] == 3:
         if user_message in yes_responses:

@@ -104,26 +104,32 @@
 
   document.body.appendChild(overlay);
 
+  // Detect mobile devices (basic check)
+  function isMobileDevice() {
+    return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
   function checkOrientation() {
     const isPortrait = window.innerHeight > window.innerWidth;
     const isFullscreen = !!document.fullscreenElement;
     const hasFullscreenFlag = localStorage.getItem('fullscreenMode') === 'true';
     const isLandscapeOrientation = screen.orientation?.type.startsWith('landscape') ?? false;
+    const isMobile = isMobileDevice();
 
-    if (isFullscreen && !isPortrait && hasFullscreenFlag && isLandscapeOrientation) {
+    if (isMobile && isFullscreen && !isPortrait && hasFullscreenFlag && isLandscapeOrientation) {
       // fullscreen + landscape + flag: hide overlay, show exit button
       overlay.style.display = 'none';
       if (fullscreenBtn) fullscreenBtn.style.display = 'none';
       exitBtn.style.display = 'inline-block';
-    } else if (isPortrait && !hasFullscreenFlag) {
+    } else if (isMobile && isPortrait && !hasFullscreenFlag) {
       // portrait + no fullscreen flag: show overlay and enter fullscreen button
       overlay.style.display = 'flex';
       if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
       exitBtn.style.display = 'none';
     } else {
-      // other cases: show overlay and enter fullscreen button, hide exit button
-      overlay.style.display = 'flex';
-      if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
+      // other cases: hide overlay and buttons on desktop or landscape without fullscreen
+      overlay.style.display = 'none';
+      if (fullscreenBtn) fullscreenBtn.style.display = 'none';
       exitBtn.style.display = 'none';
     }
   }
@@ -132,7 +138,7 @@
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement) {
       localStorage.removeItem('fullscreenMode');
-      overlay.style.display = 'flex';
+      overlay.style.display = 'none';
       if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
       exitBtn.style.display = 'none';
     } else {

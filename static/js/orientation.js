@@ -36,7 +36,6 @@
 
   overlay.appendChild(message);
 
-  // Fullscreen button (only if supported)
   let fullscreenBtn = null;
   if ('orientation' in screen && screen.orientation.lock && document.documentElement.requestFullscreen) {
     fullscreenBtn = document.createElement('button');
@@ -49,16 +48,17 @@
       backgroundColor: '#4a90e2',
       color: 'white',
       cursor: 'pointer',
-      boxShadow: '0 0.5vh 1vh rgba(0, 0, 0, 0.3)'
+      boxShadow: '0 0.5vh 1vh rgba(0, 0, 0, 0.3)',
+      marginBottom: '1.5vh',
+      display: 'inline-block'
     });
 
     fullscreenBtn.addEventListener('click', async () => {
       try {
         await document.documentElement.requestFullscreen();
         await screen.orientation.lock('landscape');
-        localStorage.setItem('fullscreenMode', 'true');  // persistent flag
+        localStorage.setItem('fullscreenMode', 'true');
         overlay.style.display = 'none';
-        fullscreenBtn.style.display = 'none';
         exitBtn.style.display = 'inline-block';
       } catch (err) {
         alert('Could not enter fullscreen or lock orientation: ' + err.message);
@@ -74,7 +74,6 @@
     overlay.appendChild(fallbackNote);
   }
 
-  // Exit fullscreen button
   const exitBtn = document.createElement('button');
   exitBtn.textContent = '❌ Exit Fullscreen';
   Object.assign(exitBtn.style, {
@@ -87,7 +86,7 @@
     cursor: 'pointer',
     boxShadow: '0 0.5vh 1vh rgba(0, 0, 0, 0.3)',
     marginTop: '1.5vh',
-    display: 'none' // initially hidden
+    display: 'none'
   });
 
   exitBtn.addEventListener('click', async () => {
@@ -96,15 +95,12 @@
     }
     localStorage.removeItem('fullscreenMode');
     overlay.style.display = 'flex';
-    if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
     exitBtn.style.display = 'none';
   });
 
   overlay.appendChild(exitBtn);
-
   document.body.appendChild(overlay);
 
-  // Detect mobile devices (basic check)
   function isMobileDevice() {
     return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
@@ -116,29 +112,26 @@
     const isLandscapeOrientation = screen.orientation?.type.startsWith('landscape') ?? false;
     const isMobile = isMobileDevice();
 
-    if (isMobile && isFullscreen && !isPortrait && hasFullscreenFlag && isLandscapeOrientation) {
-      // fullscreen + landscape + flag: hide overlay, show exit button
-      overlay.style.display = 'none';
-      if (fullscreenBtn) fullscreenBtn.style.display = 'none';
-      exitBtn.style.display = 'inline-block';
-    } else if (isMobile && isPortrait && !hasFullscreenFlag) {
-      // portrait + no fullscreen flag: show overlay and enter fullscreen button
-      overlay.style.display = 'flex';
-      if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
-      exitBtn.style.display = 'none';
+    if (isMobile) {
+      if (isFullscreen && !isPortrait && hasFullscreenFlag && isLandscapeOrientation) {
+        overlay.style.display = 'none';
+        exitBtn.style.display = 'inline-block';
+      } else {
+        overlay.style.display = 'flex';
+        if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
+        exitBtn.style.display = 'none';
+      }
     } else {
-      // other cases: hide overlay and buttons on desktop or landscape without fullscreen
       overlay.style.display = 'none';
       if (fullscreenBtn) fullscreenBtn.style.display = 'none';
       exitBtn.style.display = 'none';
     }
   }
 
-  // Listen for fullscreen changes on the current page
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement) {
       localStorage.removeItem('fullscreenMode');
-      overlay.style.display = 'none';
+      overlay.style.display = 'flex';
       if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
       exitBtn.style.display = 'none';
     } else {
@@ -146,14 +139,12 @@
     }
   });
 
-  // Listen for localStorage changes from other tabs/pages (sync fullscreen flag)
   window.addEventListener('storage', (event) => {
     if (event.key === 'fullscreenMode') {
       checkOrientation();
     }
   });
 
-  // Initial checks on load and on viewport changes
   window.addEventListener('load', () => {
     setTimeout(checkOrientation, 50);
   });

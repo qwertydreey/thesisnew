@@ -7,6 +7,7 @@ import openai
 import re
 import random
 from flask import session
+from functools import wraps
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -26,6 +27,15 @@ db = mysql.connector.connect(
     database=os.getenv("DB_NAME")
 )
 cursor = db.cursor(dictionary=True)
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('You must be logged in to access this page.', 'warning')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 # --- Routes ---
@@ -77,6 +87,7 @@ def get_user_from_db():
 
 
 @app.route('/register', methods=['GET', 'POST'])
+@login_required
 def register():
     if request.method == 'POST':
         username = request.form['username'].strip()
@@ -1013,10 +1024,12 @@ def reset_chat_session():
 
 
 @app.route('/chatbot')
+@login_required
 def chatbot():
     return render_template('chatbot.html')
 
 @app.route('/stages')
+@login_required
 def stages():
     # Retrieve the selected map from the URL query parameters
     selected_map = request.args.get('map', None)  # Get the selected map (e.g., multiplication)
@@ -1024,23 +1037,28 @@ def stages():
     return render_template('stages.html', selected_map=selected_map, selected_stage=selected_stage)
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
     user = get_user_from_db()  # Fetch user from database
     if not user:
         flash('User not found or not logged in.', 'danger')
         return redirect(url_for('login'))
-    
-    # Pass first_name, last_name, and gender to the template
-    return render_template('dashboard.html', first_name=user['first_name'], 
-                           last_name=user['last_name'], gender=user['gender'], id=user ['id'])
 
+    # Pass first_name, last_name, gender, and id to the template
+    return render_template('dashboard.html', 
+                           first_name=user['first_name'], 
+                           last_name=user['last_name'], 
+                           gender=user['gender'], 
+                           id=user['id'])
 
 
 @app.route('/roadmap')
+@login_required
 def roadmap():
     return render_template('roadmap.html')
 
 @app.route('/shop')
+@login_required
 def shop():
     return render_template('shop.html')
 
@@ -1052,6 +1070,7 @@ import json
 from flask import redirect, session, render_template
 
 @app.route('/collectibles')
+@login_required
 def collectibles():
     user_id = session.get('user_id')  # Get user_id from session or other source
 
@@ -1086,15 +1105,20 @@ def collectibles():
 
 
 @app.route('/monster_atlas')
+@login_required
 def monster_atlas():
     return render_template('monster_atlas.html')
 
 @app.route('/logout')
 def logout():
+    session.clear()  # This removes all session data, including 'user_id'
+    flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
 
+
 @app.route('/game', methods=['GET'])
+@login_required
 def game():
     user_id = 1  # Hardcoded user ID
 

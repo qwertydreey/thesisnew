@@ -57,7 +57,7 @@
       </div>
 
       <!-- DELETE AFTER COPY RESPONSE BUTTON -->
-      <div style="flex: 0 0 auto; margin-left: 8px;">
+      <!-- <div style="flex: 0 0 auto; margin-left: 8px;">
         <button id="copyResponsesBtn" onclick="copyChat()" style="
           background-color: #007bff;
           color: white;
@@ -73,7 +73,7 @@
         >
           Copy Responses
         </button>
-      </div>
+      </div> -->
       <!-- DELETE AFTER COPY RESPONSE BUTTON -->
 
     </div>
@@ -101,7 +101,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- DELETE AFTER COPY RESPONSE BUTTON -->
-    <script>
+    <!-- <script>
       function copyChat() {
         if (messages.length === 0) {
           alert("No chat messages to copy!");
@@ -119,37 +119,25 @@
           alert("Failed to copy chat: " + err);
         });
       }
-    </script>
+    </script> -->
   <!-- DELETE AFTER COPY RESPONSE BUTTON --> 
       
 
 
     <!-- Sample Chat Logic -->
     <script>
-// Check if page load is due to reload
-const navEntries = performance.getEntriesByType("navigation");
-const isReload = navEntries.length > 0 && navEntries[0].type === 'reload';
+    const today = new Date().toDateString();
+    const lastSavedDate = localStorage.getItem('chatDate');
 
-if (isReload) {
-    sessionStorage.removeItem('chatMessages');
-    console.log('SessionStorage chatMessages cleared due to page reload.');
+    if (lastSavedDate !== today) {
+        localStorage.removeItem('chatMessages');
+        localStorage.setItem('chatDate', today);
+    }
 
-    fetch('/reset-chat-session', { method: 'POST' })
-        .then(response => {
-            if (response.ok) {
-                console.log('Chat session reset on server successfully.');
-            } else {
-                console.error('Failed to reset chat session on server.');
-            }
-        })
-        .catch(error => console.error('Error resetting chat session:', error));
-} else {
-    console.log('Page load is NOT a reload. SessionStorage chatMessages not cleared.');
-}
 
     
         // Load saved messages or start with empty array
-        const savedMessages = sessionStorage.getItem('chatMessages');
+        const savedMessages = localStorage.getItem('chatMessages');
         const messages = savedMessages ? JSON.parse(savedMessages) : [];
     
         const chatBox = document.getElementById('chat-box');
@@ -162,7 +150,7 @@ if (isReload) {
         let selectedVoice = null;
     
         function saveMessagesToStorage() {
-            sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+          localStorage.setItem('chatMessages', JSON.stringify(messages));
         }
     
         // Render messages so newest pairs are on top, grouped as user+bot pairs
@@ -349,7 +337,7 @@ form.addEventListener('submit', async function(e) {
   messages.length = 0;
 
   // Clear sessionStorage
-  sessionStorage.removeItem('chatMessages');
+  localStorage.removeItem('chatMessages');
   fetch('/reset-chat-session', { method: 'POST' });
 
   // Clear the chat box UI
@@ -364,7 +352,7 @@ form.addEventListener('submit', async function(e) {
 async function resetBackendSession() {
     await fetch('/reset-chat-session', { method: 'POST' });
     // Clear local sessionStorage too
-    sessionStorage.removeItem('chatMessages');
+    localStorage.removeItem('chatMessages');
     messages.length = 0;
     renderMessages();
 }

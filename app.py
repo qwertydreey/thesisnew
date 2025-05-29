@@ -1,19 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_bcrypt import Bcrypt
-from flask import request, jsonify
 import os
 import mysql.connector
 import openai
 import re
 import random
-from flask import session
 from functools import wraps
+from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this later
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Session valid for 7 days
 
 # Initialize extensions
 bcrypt = Bcrypt(app)
@@ -42,7 +42,10 @@ def login_required(f):
 
 @app.route('/')
 def index():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
+
 
 
 @app.route('/favicon.ico')
@@ -61,7 +64,7 @@ def login():
         user = cursor.fetchone()
 
         if user and bcrypt.check_password_hash(user['password'], password):
-            # Set session for user ID
+            session.permanent = True  # ← This is key!
             session['user_id'] = user['id']
             print(f"User ID saved to session: {session['user_id']}")  # Debug print
             return jsonify({'success': True, 'redirect': url_for('dashboard')})

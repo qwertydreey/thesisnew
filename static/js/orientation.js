@@ -1,4 +1,7 @@
 (function () {
+  // ✅ Clear old localStorage key if it exists
+  localStorage.removeItem('fullscreenMode');
+
   const overlay = document.createElement('div');
   overlay.id = 'rotate-warning';
   Object.assign(overlay.style, {
@@ -57,7 +60,6 @@
       try {
         await document.documentElement.requestFullscreen();
         await screen.orientation.lock('landscape');
-        localStorage.setItem('fullscreenMode', 'true');
         overlay.style.display = 'none';
         exitBtn.style.display = 'inline-block';
       } catch (err) {
@@ -93,7 +95,6 @@
     if (document.fullscreenElement) {
       await document.exitFullscreen();
     }
-    localStorage.removeItem('fullscreenMode');
     overlay.style.display = 'flex';
     exitBtn.style.display = 'none';
   });
@@ -108,14 +109,14 @@
   function checkOrientation() {
     const isPortrait = window.innerHeight > window.innerWidth;
     const isFullscreen = !!document.fullscreenElement;
-    const hasFullscreenFlag = localStorage.getItem('fullscreenMode') === 'true';
     const isLandscapeOrientation = screen.orientation?.type.startsWith('landscape') ?? false;
     const isMobile = isMobileDevice();
 
     if (isMobile) {
-      if (isFullscreen && !isPortrait && hasFullscreenFlag && isLandscapeOrientation) {
+      if (isFullscreen && !isPortrait && isLandscapeOrientation) {
         overlay.style.display = 'none';
         exitBtn.style.display = 'inline-block';
+        if (fullscreenBtn) fullscreenBtn.style.display = 'none';
       } else {
         overlay.style.display = 'flex';
         if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
@@ -130,17 +131,10 @@
 
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement) {
-      localStorage.removeItem('fullscreenMode');
       overlay.style.display = 'flex';
       if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
       exitBtn.style.display = 'none';
     } else {
-      checkOrientation();
-    }
-  });
-
-  window.addEventListener('storage', (event) => {
-    if (event.key === 'fullscreenMode') {
       checkOrientation();
     }
   });

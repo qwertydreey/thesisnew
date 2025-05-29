@@ -126,16 +126,28 @@
 
     <!-- Sample Chat Logic -->
     <script>
-        // Check if page load is due to reload
-        const navEntries = performance.getEntriesByType("navigation");
-        const isReload = navEntries.length > 0 && navEntries[0].type === 'reload';
-    
-        // Clear sessionStorage chat only if it's reload
-        if (isReload) {
-            sessionStorage.removeItem('chatMessages');
-            fetch('/reset-chat-session', { method: 'POST' });
+// Check if page load is due to reload
+const navEntries = performance.getEntriesByType("navigation");
+const isReload = navEntries.length > 0 && navEntries[0].type === 'reload';
 
-        }
+// Clear sessionStorage chat only if it's reload
+if (isReload) {
+    sessionStorage.removeItem('chatMessages');
+    console.log('SessionStorage chatMessages cleared due to page reload.');
+
+    fetch('/reset-chat-session', { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                console.log('Chat session reset on server successfully.');
+            } else {
+                console.error('Failed to reset chat session on server.');
+            }
+        })
+        .catch(error => console.error('Error resetting chat session:', error));
+} else {
+    console.log('Page load is NOT a reload. SessionStorage chatMessages not cleared.');
+}
+
     
         // Load saved messages or start with empty array
         const savedMessages = sessionStorage.getItem('chatMessages');

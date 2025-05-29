@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_bcrypt import Bcrypt
 from flask import request, jsonify
-from dotenv import load_dotenv
-load_dotenv()
 import os
 import mysql.connector
 import openai
 import re
 import random
+from flask import session
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this later
@@ -38,7 +40,6 @@ def favicon():
     return '', 204  # Returns no content, effectively ignoring the request
 
 
-from flask import session
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -178,8 +179,7 @@ openai.api_key = "sk-or-v1-496a2dccc03cc234cee6e19ea9f8b81ebf4cbd9721141db105bde
 
 
 
-import re
-import random
+
 
 def emoji_math(question: str):
     question = question.lower().strip()
@@ -311,6 +311,448 @@ def check_answer(user_answer: str, expected_answer) -> bool:
         print(f"Error in check_answer: {e}")
         return False
 
+keyword_synonyms = {
+    "plus": "add",
+    "addition": "add",
+    "minus": "subtract",
+    "subtraction": "subtract",
+    "times": "multiply",
+    "multiplied": "multiply",
+    "multiplication": "multiply",
+    "divide": "divide",
+    "division": "divide",
+    "greater than": "greater than",
+    ">": "greater than",
+    "less than": "less than",
+    "<": "less than",
+    "equal": "equal",
+    "=": "equal",
+    "counting": "count",
+    "count": "count",
+    "place value": "place value",
+    "placevalue": "place value",
+    # add more as needed
+}
+
+tips_per_topic = {
+    "add": [
+        "Adding means putting groups together to find out how many there are in all. Try counting one by one to see the total!",
+        "When you add, you count all the things together to get a bigger number. For example, if you have 3 apples and add 2 more, count them all to see how many you have.",
+        "Add by starting with one group and then counting on the next group. Like putting together two sets of blocks and counting all the blocks one by one.",
+        "Think of adding as putting two piles of toys together. How many toys do you have now? You can count each toy to find the total.",
+        "When you add, you just put numbers together like stacking blocks. Try it yourself by using your fingers or objects around you!",
+        "Adding helps you find out how many things there are altogether. It’s like making a bigger group from smaller groups.",
+        "You can add numbers in any order, and you will still get the same answer. This is called the commutative property of addition.",
+        "Try adding numbers by counting up from the bigger number. For example, start at 5 and count up 3 more: 6, 7, 8.",
+        "Adding is useful for many real-life things, like putting together candies, toys, or friends in a group.",
+        "Practice adding small numbers first, then try bigger numbers to get better at it."
+    ],
+    "addition": [
+        "Addition is like joining groups to see how many you have in total. For example, joining 4 red balls and 3 blue balls means adding 4 and 3.",
+        "Try counting all the parts together carefully when you add. Make sure you don’t miss any objects!",
+        "When you add, you start from one number and count on more numbers to find the total.",
+        "Think of addition as collecting items and counting the total number you have in your collection.",
+        "Adding helps you find the whole when you have parts. For example, if you have 2 parts of a puzzle and add 3 more, you have 5 parts in all.",
+        "Use addition when you want to find out how many things are combined or joined together.",
+        "Addition is the foundation for learning more math, like multiplication and problem-solving.",
+        "You can add numbers in any order and still get the same answer, which makes adding easier.",
+        "Try using number lines to help you add numbers by moving forward step by step.",
+        "Practice addition with real things like coins, toys, or snacks to understand it better."
+    ],
+    "plus": [
+        "The plus sign (+) means add or join groups together. It tells you to put numbers together and find the total.",
+        "When you see plus, it means put numbers together and count all the objects to get a bigger number.",
+        "Try thinking of plus as putting pieces together to get bigger numbers, like stacking blocks or joining friends in a game.",
+        "Plus is a way to say 'add more' — so when you see plus, think about how many you will have in total.",
+        "Use plus to combine numbers and find the total amount quickly and easily.",
+        "The plus sign helps show that you want to add two or more numbers together.",
+        "You can use plus many times in a math problem to keep adding groups step by step.",
+        "Plus signs are used everywhere in math to tell you to add things, from simple sums to bigger problems.",
+        "Try to say 'plus' out loud when you see the sign (+) to remember it means to add.",
+        "Practice adding with the plus sign by solving small math problems with friends or family."
+    ],
+    "subtract": [
+        "Subtracting means taking some away. Try counting how many are left after you take some away from a group.",
+        "When you subtract, you start with a number and take away parts to see what remains or is left.",
+        "Think of subtracting like eating some candies from a bowl. How many candies are left after you eat some?",
+        "Try to count backwards when you subtract to find the answer. For example, if you have 7 and take away 2, count backwards 6, 5.",
+        "Subtracting is like sharing and giving some away. Can you try to find how many remain after giving some?",
+        "Subtracting helps you find the difference between numbers or how much less one number is compared to another.",
+        "You can use subtraction to solve problems like how many toys are left after some are lost or given away.",
+        "Subtracting means finding out what is left when you take away from a whole group.",
+        "Practice subtraction by taking away objects and counting what remains to understand it better.",
+        "Remember, subtraction is the opposite of addition, and they work together to help you solve problems."
+    ],
+    "subtraction": [
+        "Subtraction is when you take away from a number to see what's left or remains after some parts are removed.",
+        "Try counting backwards when subtracting to find the answer quickly and correctly.",
+        "When you subtract, imagine some things are gone or taken away. How many remain after that?",
+        "Subtraction helps you find out what is left after some are taken away from a group.",
+        "Take away numbers carefully and count what remains to get the correct answer.",
+        "You can use subtraction in many real life situations, like sharing candies or finding how many apples are left.",
+        "Subtraction is helpful when comparing numbers and finding the difference between them.",
+        "Try to use number lines to move backwards when subtracting to help you understand it better.",
+        "Practice subtraction with objects you can see and touch, like toys or blocks, to make learning fun.",
+        "Subtraction and addition are partners; knowing both helps you solve many math problems."
+    ],
+    "minus": [
+        "The minus sign (-) means take away or subtract. It tells you to find out how many are left after removing some.",
+        "Minus means you have less. Try counting backward to see how many are left after taking some away.",
+        "When you see minus, you remove some from the total number and find what remains.",
+        "Minus helps you find how much is left after taking some away from a group or amount.",
+        "Use minus to find out how many fewer things you have after subtraction.",
+        "The minus sign is important to show subtraction in math problems and equations.",
+        "Try to say 'minus' when you see the sign (-) to remember it means to subtract.",
+        "You can use minus many times when subtracting multiple numbers step by step.",
+        "Practice subtraction problems with the minus sign to get faster and better at math.",
+        "Minus is a key symbol to understand when learning about taking away and differences."
+    ],
+
+    "multiply": [
+        "Multiplying means you add the same number over and over again. For example, 3 times 4 means you add 3 four times: 3 + 3 + 3 + 3.",
+        "Try thinking of multiplication as putting groups of the same size together. Like if you have 5 baskets and each basket has 2 apples, you multiply 5 times 2 to find out how many apples there are in total.",
+        "Multiplication helps you count faster because instead of adding one by one, you can jump in groups. It’s like a shortcut to adding many numbers.",
+        "When you multiply, you find out how many things there are altogether by counting groups of the same size. For example, if you have 4 groups of 3 toys, you multiply 4 times 3 to know the total toys.",
+        "Use multiplication whenever you want to count many groups quickly. It helps with things like sharing snacks evenly, counting legs of animals, or finding how many wheels on many bikes.",
+        "Multiplication is also called repeated addition. If you know how to add, multiplication is just adding the same number several times.",
+        "You can use your fingers or draw pictures to help understand multiplication better. For example, draw 3 circles with 4 dots each to see how many dots in total.",
+        "Multiplying can make solving problems easier and faster. Instead of adding 2 + 2 + 2 + 2 + 2, you just say 2 times 5, which equals 10.",
+        "Practice multiplication with real things around you, like counting candies in packs or the number of chairs in rows.",
+        "Multiplication helps in many games and real life situations, like sharing or organizing things into equal groups."
+    ],
+
+    "multiplication": [
+        "Multiplication means putting equal groups together to find the total number of items quickly.",
+        "Imagine you have several baskets, each with the same number of apples inside. Counting all apples is multiplication!",
+        "Try to count groups quickly by multiplying instead of adding one by one.",
+        "Multiplication is like repeated addition. For example, 4 groups of 3 means adding 3 + 3 + 3 + 3.",
+        "Use multiplication to solve problems when you have many groups or sets of things.",
+        "Multiplication helps you find totals faster when you know how many items are in each group and how many groups there are.",
+        "Multiplying zero with any number always gives zero because there are no groups to count.",
+        "Practice multiplying small numbers first and then try bigger ones to become faster and better.",
+        "Remember, multiplication answers are called products, and the numbers you multiply are called factors.",
+        "You can use multiplication in everyday life, like figuring out how many legs are on many animals or how many wheels on several bikes."
+    ],
+    "times": [
+        "The times sign (×) means multiply or find groups of numbers together.",
+        "Times means you add the same number again and again. For example, 3 × 4 means 3 added 4 times.",
+        "Think of times as counting groups that all have the same amount inside them.",
+        "When you see the times sign, multiply the numbers to find the total quickly instead of adding repeatedly.",
+        "Use times to find how many things there are in many groups or sets.",
+        "The times symbol helps you understand multiplication in math problems and equations.",
+        "Say 'times' out loud when you see the sign × to remember it means multiply.",
+        "Try solving multiplication problems with the times sign to practice and get faster.",
+        "Times can be used in word problems, like finding total candies in several boxes with equal candies inside.",
+        "Multiplication times tables help you quickly find answers for times problems."
+    ],
+    "divide": [
+        "Dividing means sharing things equally among groups or parts.",
+        "Try to split a big group into smaller equal parts when you divide.",
+        "Division helps you find out how many items are in each group when sharing or splitting.",
+        "Imagine cutting a pizza into equal slices — that’s dividing the pizza fairly.",
+        "Use division to share or split things evenly so everyone gets the same amount.",
+        "Division is the opposite of multiplication — it helps you find how many groups or how big each group is.",
+        "When you divide, you check how many times one number fits into another number evenly.",
+        "Practice dividing small numbers first to understand sharing equally.",
+        "Division can also help find remainders when something doesn’t split evenly.",
+        "Use division in real life to share candies, money, or toys fairly with friends."
+    ],
+    "division": [
+        "Division means splitting a number into equal parts or groups to find how many or how big each part is.",
+        "Try sharing numbers equally to understand how division works.",
+        "Division helps you see how many groups or parts you can make from a total amount.",
+        "Think of division like sharing candies fairly with friends, making sure each friend gets the same number.",
+        "Use division to divide things into smaller equal pieces when you want to split something.",
+        "Division answers are called quotients, and the number you divide by is called the divisor.",
+        "Division can sometimes leave a remainder if things don’t split evenly.",
+        "Practice division with objects to see how splitting works in real life.",
+        "Use number lines or grouping to help understand division better.",
+        "Division is important for many real-life problems, like dividing food or money."
+    ],
+    "count": [
+        "Counting means saying numbers one by one in the right order to find out how many things there are.",
+        "Try counting objects slowly and carefully to make sure you don’t miss any items.",
+        "Counting helps you find out how many things are in a group or set.",
+        "Start counting from one and keep going until you count all the objects.",
+        "Use your fingers, toys, or other objects to help you count better.",
+        "Counting is the first step in learning math and helps with addition and subtraction later.",
+        "Try counting forwards and backwards to get better at numbers.",
+        "You can count by ones, twos, fives, or tens as you get more comfortable with numbers.",
+        "Practice counting objects around you like books, pencils, or apples.",
+        "Counting well helps you understand numbers and how they work."
+    ],
+    "number": [
+        "Numbers tell us how many things there are or how much of something we have.",
+        "Try reading numbers from left to right carefully to understand their value.",
+        "Numbers can be big or small, but each one tells a certain value or amount.",
+        "Use numbers to count, add, subtract, multiply, and divide in math.",
+        "Look at each number and try to understand what it means in different places.",
+        "Numbers help us measure, compare, and solve problems every day.",
+        "Try writing numbers in different ways to practice recognizing them.",
+        "Numbers are made up of digits, and each digit has a place value.",
+        "Knowing numbers well helps you in math and in real life.",
+        "Numbers can be used to tell time, measure weight, or count money."
+    ],
+    "place value": [
+        "Place value tells us how much each digit in a number is worth depending on its position.",
+        "In 23, the 2 means twenty because it is in the tens place, and the 3 is in the ones place.",
+        "Each digit in a number has a special value. Try saying what each digit means in a number.",
+        "Look at the place of each digit — ones, tens, hundreds — to know its value.",
+        "Place value helps us understand numbers better and how to read them correctly.",
+        "Try breaking numbers apart by place value to see what each part is worth.",
+        "Place value is important for adding and subtracting bigger numbers.",
+        "Practice finding the place value of digits in different numbers.",
+        "Knowing place value helps you understand how numbers grow bigger or smaller.",
+        "Use place value to help with reading, writing, and comparing numbers."
+    ],
+    "roman numeral": [
+        "Roman numerals use letters like I, V, and X to show numbers instead of digits.",
+        "Look at the letters in Roman numerals and add or subtract their values to find the number.",
+        "Roman numerals are like secret codes for numbers. Can you decode what they mean?",
+        "Try matching each Roman numeral letter to a number and adding them up carefully.",
+        "Roman numerals show numbers differently, but we can learn to read and write them!",
+        "Some letters like I, X, and C can be combined in different ways to form many numbers.",
+        "Roman numerals don’t use zero, so counting works differently than with regular numbers.",
+        "Practice writing simple numbers like I, V, X, L, C, D, and M in Roman numerals.",
+        "Try reading Roman numerals on clocks, books, or monuments to see them in real life.",
+        "Learning Roman numerals helps you understand history and how numbers were used long ago."
+    ],
+    "compare": [
+        "Comparing numbers means finding out which number is bigger, smaller, or if they are the same.",
+        "Look carefully at numbers to see which one is greater or less than the other.",
+        "Use words like 'greater than,' 'less than,' or 'equal to' when comparing numbers.",
+        "Try lining up numbers from smallest to biggest to compare them easily.",
+        "Comparing helps us decide which number is larger, smaller, or if two numbers are equal.",
+        "Use symbols like > (greater than), < (less than), and = (equal to) to compare numbers.",
+        "Practice comparing numbers by looking at their digits and place values.",
+        "When numbers have the same digits, compare their place values starting from the left.",
+        "Comparing numbers helps in real life, like deciding who has more money or points.",
+        "Try comparing numbers using objects or pictures to make it fun and easy."
+    ],
+    "greater than": [
+        "Greater than means one number is bigger than another number.",
+        "The symbol > shows 'greater than.' Look which number is bigger and put it first.",
+        "Try to find the bigger number when comparing two or more numbers.",
+        "When you see greater than, the bigger number goes before the symbol, like 5 > 3.",
+        "Use greater than to compare numbers and find which one is larger.",
+        "Remember, the symbol > looks like an open mouth that always 'eats' the bigger number first.",
+        "Practice using greater than in different math problems and real-life situations.",
+        "Try reading the symbol > as 'is greater than' when you see it in math.",
+        "Greater than helps you order numbers from biggest to smallest.",
+        "Use greater than when comparing scores, ages, or quantities."
+    ],
+    "less than": [
+        "Less than means one number is smaller than another number.",
+        "The symbol < shows 'less than.' Look which number is smaller and put it first.",
+        "Try to find the smaller number when comparing two or more numbers.",
+        "When you see less than, the smaller number goes before the symbol, like 2 < 6.",
+        "Use less than to compare numbers and find which one is smaller.",
+        "Remember, the symbol < looks like an open mouth that always 'eats' the bigger number, so the smaller number goes first.",
+        "Practice using less than in math problems and real-life examples.",
+        "Try reading the symbol < as 'is less than' when you see it in math.",
+        "Less than helps you order numbers from smallest to biggest.",
+        "Use less than when comparing prices, heights, or amounts."
+    ],
+
+    "equal": [
+        "Equal means two numbers are the same.",
+        "The symbol = shows equal. Both sides have the same value.",
+        "Try checking if two numbers are the same or not.",
+        "Equal means no difference between numbers.",
+        "Use equal to show when numbers match exactly."
+    ],
+    "word problem": [
+        "Word problems tell a story with numbers to solve.",
+        "Try reading carefully and find what the question asks.",
+        "Look for numbers and keywords in the story.",
+        "Break the problem into small parts to understand it.",
+        "Use drawings or objects to help solve word problems."
+    ],
+    "how many": [
+        "When a question asks 'how many', count carefully.",
+        "Try to find the total number of objects or items.",
+        "Look at the problem and see what needs to be counted.",
+        "Counting helps answer 'how many' questions easily.",
+        "Use your fingers or objects to help count and answer."
+    ],
+    "left": [
+        "Left means what remains after some are taken away.",
+        "Try counting what is left after sharing or subtracting.",
+        "Look for the word 'left' to know you should subtract.",
+        "Use subtraction to find out how many are left.",
+        "Imagine taking away some toys, how many are left?"
+    ],
+    "more": [
+        "More means you add to get a bigger number.",
+        "Try adding when you see the word 'more' in a problem.",
+        "Look for how many more things there are.",
+        "Adding helps you find out how many you have in total.",
+        "Use addition to find out how much more you get."
+    ],
+    "fewer": [
+        "Fewer means less or a smaller number.",
+        "Try subtracting when you see the word 'fewer'.",
+        "Look for what is taken away or less in the problem.",
+        "Subtracting helps you find how many fewer there are.",
+        "Use subtraction to find the smaller amount."
+    ],
+    "counting forward": [
+        "Counting forward means saying numbers from small to big.",
+        "Try starting at a number and counting up one by one.",
+        "Counting forward helps you add or find next numbers.",
+        "Use your fingers to count forward slowly and clearly.",
+        "Practice counting forward to get better at numbers."
+    ],
+    "skip counting": [
+        "Skip counting means counting by 2s, 5s, or 10s.",
+        "Try jumping numbers like 2, 4, 6 or 5, 10, 15.",
+        "Skip counting helps you count faster in groups.",
+        "Practice skip counting to help with multiplication.",
+        "Use skip counting to find patterns in numbers."
+    ],
+    "counting backwards": [
+        "Counting backwards means saying numbers from big to small.",
+        "Try starting at a number and counting down one by one.",
+        "Counting backwards helps with subtraction.",
+        "Use your fingers to count backwards slowly and carefully.",
+        "Practice counting backwards to get better at numbers."
+    ],
+    "borrowing": [
+        "Borrowing means taking from the next place value to subtract.",
+        "Try borrowing when the top number is smaller than the bottom one.",
+        "Borrowing helps you subtract bigger numbers easily.",
+        "Imagine borrowing blocks from the next place to help subtract.",
+        "Practice borrowing to solve tricky subtraction problems."
+    ],
+    "regrouping": [
+        "Regrouping means moving values between places to add or subtract.",
+        "Try regrouping when numbers are too big to handle in one place.",
+        "Regrouping helps you add or subtract correctly with big numbers.",
+        "Think of regrouping like exchanging blocks from tens to ones.",
+        "Practice regrouping to make adding and subtracting easier."
+    ],
+    "long division": [
+        "Long division means dividing big numbers step by step.",
+        "Try breaking the number into smaller parts to divide.",
+        "Long division helps you divide numbers that don’t fit easily.",
+        "Use long division to find how many times one number goes into another.",
+        "Practice long division with small steps and take your time."
+    ],
+    "reading roman numerals": [
+        "Reading Roman numerals means knowing what letters like I, V, and X mean.",
+        "Try matching Roman numerals to numbers and adding or subtracting.",
+        "Roman numerals are special number letters used long ago.",
+        "Practice reading Roman numerals by learning each letter’s value.",
+        "Use Roman numerals to read numbers in a fun way."
+    ],
+    "converting roman numerals": [
+        "Converting Roman numerals means changing letters to regular numbers.",
+        "Try adding or subtracting values when converting Roman numerals.",
+        "Practice converting by learning the value of each letter first.",
+        "Use clues in the Roman numerals to find the right number.",
+        "Converting Roman numerals is like solving a number puzzle."
+    ],
+    "ones": [
+        "Ones place means how many single items there are.",
+        "Look at the digit in the ones place to know its value.",
+        "Ones are the smallest place value in numbers.",
+        "Try saying the value of the ones digit in a number.",
+        "Use the ones place to help read and understand numbers."
+    ],
+    "tens": [
+        "Tens place means how many groups of ten there are.",
+        "Look at the digit in the tens place to know its value.",
+        "Each digit in tens means ten times that number.",
+        "Try saying the value of the tens digit in a number.",
+        "Use the tens place to help read and understand numbers."
+    ],
+    "hundreds": [
+        "Hundreds place means how many groups of one hundred there are.",
+        "Look at the digit in the hundreds place to know its value.",
+        "Each digit in hundreds means one hundred times that number.",
+        "Try saying the value of the hundreds digit in a number.",
+        "Use the hundreds place to help read and understand numbers."
+    ],
+    "thousands": [
+        "Thousands place means how many groups of one thousand there are.",
+        "Look at the digit in the thousands place to know its value.",
+        "Each digit in thousands means one thousand times that number.",
+        "Try saying the value of the thousands digit in a number.",
+        "Use the thousands place to help read and understand numbers."
+    ],
+    "ten thousands": [
+        "Ten thousands place means how many groups of ten thousand there are.",
+        "Look at the digit in the ten thousands place to know its value.",
+        "Each digit in ten thousands means ten thousand times that number.",
+        "Try saying the value of the ten thousands digit in a number.",
+        "Use the ten thousands place to help read and understand numbers."
+    ],
+
+}
+
+
+
+
+def get_random_tip(user_message: str) -> str:
+
+
+    user_message_lower = user_message.lower()
+
+    replacements = {
+        "x": " multiply ",
+        "*": " multiply ",
+        "+": " add ",
+        "-": " subtract ",
+        "÷": " divide ",
+        "/": " divide ",
+        "%": " modulo ",
+        ">": " greater than ",
+        "<": " less than ",
+        "=": " equal "
+    }
+
+    for symbol, word in replacements.items():
+        user_message_lower = user_message_lower.replace(symbol, word)
+
+    print("Normalized message:", user_message_lower)
+
+    tokens = re.findall(r"\b\w+\b", user_message_lower)
+    print("Tokens:", tokens)
+
+    multi_word_keywords = [kw for kw in keyword_synonyms.keys() if " " in kw]
+    print("Multi-word keywords:", multi_word_keywords)
+
+    for mw_key in multi_word_keywords:
+        if mw_key in user_message_lower:
+            print("Matched multi-word keyword:", mw_key)
+            canonical_key = keyword_synonyms[mw_key]
+            tips = tips_per_topic.get(canonical_key)
+            if tips:
+                return random.choice(tips)
+
+    for token in tokens:
+        if token in keyword_synonyms:
+            canonical_key = keyword_synonyms[token]
+            tips = tips_per_topic.get(canonical_key)
+            if tips:
+                return random.choice(tips)
+        elif token in tips_per_topic:
+            # token is canonical key itself
+            tips = tips_per_topic.get(token)
+            if tips:
+                return random.choice(tips)
+
+
+    print("No keywords matched, returning generic tip.")
+    generic_tips = [
+        "Let's try to understand the problem step by step. Would you like more help?",
+        "Math can be fun if we break it down together. Need some help?",
+        "Take it one step at a time. Want me to guide you?",
+        "Try to look at each number carefully. Need some help?",
+        "Don't worry, I'm here to help you understand. Would you like more help?"
+    ]
+    return random.choice(generic_tips)
+
 
 
 @app.route('/chatbot-api', methods=['POST'])
@@ -328,6 +770,8 @@ def chatbot_api():
         session['step'] = 0
     if 'expected_answer' not in session:
         session['expected_answer'] = None
+    if 'tip_sent' not in session:
+        session['tip_sent'] = False  # track if tip sent in step 1
 
     # Step 0: Greeting or math question detection
     if session['step'] == 0:
@@ -350,102 +794,96 @@ def chatbot_api():
             return jsonify({"reply": friendly_responses.get(user_message, "I'm here to help with math!")})
 
         if not is_math_question(user_message):
-            return jsonify({"reply": "Sorry, I can only help with math questions or respond to simple greetings!"})
+            return jsonify({"reply": "Sorry, I can only help with math questions only."})
 
         # Save question and expected answer, then move to step 1
         session['last_question'] = user_message
         session['expected_answer'] = compute_answer(user_message)
         session['step'] = 1
+        session['tip_sent'] = False  # reset tip sent flag for new question
 
     if session['step'] == 1:
         if user_message in yes_responses:
             session['step'] = 2
+            session['tip_sent'] = False
         elif user_message in no_responses:
             session['step'] = 0
             session['last_question'] = ""
             session['expected_answer'] = None
+            session['tip_sent'] = False
             return jsonify({"reply": "Alright! Let me know if you have another math question."})
         else:
-            try:
-                system_prompt = "You are Counticus, a friendly Grade 1 math tutor. Explain simply."
-                tip_prompt = f"Explain simply how to solve this math problem without giving the answer: '{session['last_question']}'. End by asking: 'Would you like more help?'"
-                response = openai.ChatCompletion.create(
-                    model="mistralai/mistral-7b-instruct:free",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": tip_prompt}
-                    ]
-                )
-                tip_reply = response['choices'][0]['message']['content']
+            if not session.get('tip_sent', False):
+                try:
+                    # Use your own tip function instead of OpenAI call
+                    tip_reply = get_random_tip(session.get('last_question', ''))
 
-                # Basic check if tip_reply is too complicated, fallback to canned tip
-                if len(tip_reply) > 300:  # or some heuristic
-                    tip_reply = (
+                    # Just in case tip too long, truncate or fallback
+                    if len(tip_reply) > 300:
+                        tip_reply = (
+                            "Hi! When you add numbers, you just put them together. "
+                            "For example, if you have 1 apple and 1 more apple, how many apples do you have? "
+                            "Try counting them one by one! "
+                            "Would you like more help?"
+                        )
+
+                    final_reply = f"{tip_reply}\n\n👇 Please answer YES or NO 👇"
+                    session['tip_sent'] = True
+                    return jsonify({"reply": final_reply})
+
+                except Exception:
+                    session['tip_sent'] = True
+                    return jsonify({"reply": (
                         "Hi! When you add numbers, you just put them together. "
                         "For example, if you have 1 apple and 1 more apple, how many apples do you have? "
                         "Try counting them one by one! "
-                        "Would you like more help?"
-                    )
-
-                final_reply = f"{tip_reply}\n\n👇 Please answer YES or NO 👇"
-                return jsonify({"reply": final_reply})
-
-            except Exception as e:
-                # fallback canned tip if error
-                return jsonify({"reply": (
-                    "Hi! When you add numbers, you just put them together. "
-                    "For example, if you have 1 apple and 1 more apple, how many apples do you have? "
-                    "Try counting them one by one! "
-                    "Would you like more help?\n\n👇 Please answer YES or NO 👇"
-                )})
+                        "Would you like more help?\n\n👇 Please answer YES or NO 👇"
+                    )})
+            else:
+                return jsonify({"reply": "I'm sorry, I can't understand that.\n\nPlease reply with YES or NO only."})
 
 
-
-# Step 2: Provide step-by-step solution without final answer, then ask for user's answer
-        if session['step'] == 2:
-            emoji_response = emoji_math(session['last_question'])
-            if emoji_response:
-                session['step'] = 2.5
-                return jsonify({"reply": f"plase count the emoji below\n\n{emoji_response}\n\nWhat do you think the answer is?"})
-
-            # fallback to openAI explanation
-
-
-            # Fallback to OpenAI if not emoji-suitable
-            step_prompt = f"Give a step-by-step solution without the final answer for this math problem: '{session['last_question']}'. Then ask: 'What do you think the answer is?'"
-            try:
-                system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": step_prompt}
-                    ]
-                )
-                reply = response['choices'][0]['message']['content']
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-
+    # Step 2: Provide step-by-step solution without final answer, then ask for user's answer
+    if session['step'] == 2:
+        emoji_response = emoji_math(session['last_question'])
+        if emoji_response:
             session['step'] = 2.5
-            return jsonify({"reply": reply})
+            return jsonify({"reply": f"Please count the emoji below\n\n{emoji_response}\n\nWhat do you think the answer is?"})
 
+        step_prompt = f"Give a step-by-step solution without the final answer for this math problem: '{session['last_question']}'. Then ask: 'What do you think the answer is?'"
+        try:
+            system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": step_prompt}
+                ]
+            )
+            reply = response['choices'][0]['message']['content']
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+        session['step'] = 2.5
+        return jsonify({"reply": reply})
 
     # Step 2.5: Check user's answer, if correct reset else ask if want full explanation
     if session['step'] == 2.5:
         expected = session.get('expected_answer')
         if expected is None:
-            # If we can't compute expected answer, skip to step 3
             session['step'] = 3
         else:
             if check_answer(user_message, expected):
                 session['step'] = 0
                 session['last_question'] = ""
                 session['expected_answer'] = None
+                session['tip_sent'] = False
                 return jsonify({"reply": "That's correct! Great job! 🎉 Let me know if you want to try another question."})
             else:
                 session['step'] = 3
-                return jsonify({"reply": "That's not quite right. Would you like me to explain the full solution?\n\n👇 Please answer YES or NO 👇"})
+                return jsonify({"reply": "That's not quite right. Would you like me to explain the full solution?\n\nPlease answer YES or NO"})
 
+    # Step 3: Provide full solution if asked
     if session['step'] == 3:
         if user_message in yes_responses:
             full_prompt = f"Give a full step-by-step solution including the final answer for this math problem: '{session['last_question']}'. Keep it short and friendly for Grade 1. End the explanation with the final answer clearly stated at the bottom in bold."
@@ -460,9 +898,6 @@ def chatbot_api():
                 )
                 reply = response['choices'][0]['message']['content']
 
-                # Optional: ensure final answer is bold at the bottom if client supports Markdown
-                # For example, if the reply ends with "The answer is 4.", replace with bold
-                import re
                 final_answer_match = re.search(r"(The answer is [0-9]+\.?)", reply, re.IGNORECASE)
                 if final_answer_match:
                     final_answer_text = final_answer_match.group(1)
@@ -474,13 +909,14 @@ def chatbot_api():
             session['step'] = 0
             session['last_question'] = ""
             session['expected_answer'] = None
+            session['tip_sent'] = False
             return jsonify({"reply": reply})
-
 
         elif user_message in no_responses:
             session['step'] = 0
             session['last_question'] = ""
             session['expected_answer'] = None
+            session['tip_sent'] = False
             return jsonify({"reply": "Okay! Feel free to ask me another math question anytime."})
 
         else:

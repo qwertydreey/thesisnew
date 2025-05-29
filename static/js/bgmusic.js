@@ -161,10 +161,6 @@ function initBackgroundMusic() {
     }
 }
 
-
-
-
-
 // Initialize on page load
 window.addEventListener('load', initBackgroundMusic);
 
@@ -208,8 +204,6 @@ window.playSound = function(src, delay = 0) {
     }, delay);
 };
 
-
-
 window.muteBgMusic = function () {
     const bgMusic = document.getElementById('bg-music');
     if (bgMusic) bgMusic.muted = true;
@@ -225,6 +219,31 @@ window.toggleBgMusic = function () {
     if (bgMusic) bgMusic.muted = !bgMusic.muted;
 };
 
-window.toggleSfxMute = function () {
-    // You can implement this as needed based on your sfx mute checkbox
+window.toggleSfxMute = function() {
+    const sfxMuteCheckbox = document.getElementById('sfxMuteCheckbox');
+    if (!sfxMuteCheckbox) return;
+
+    // Toggle the checked state
+    sfxMuteCheckbox.checked = !sfxMuteCheckbox.checked;
+
+    // Update localStorage
+    localStorage.setItem('sfxMuted', sfxMuteCheckbox.checked);
+
+    // (Optional) You can add any additional logic here if needed
 };
+
+
+// *** NEW CODE FOR AUTO MUTE WHEN TAB IS NOT ACTIVE ***
+
+document.addEventListener('visibilitychange', () => {
+    const bgMusic = document.getElementById('bg-music');
+    if (!bgMusic) return;
+
+    if (document.hidden) {
+        bgMusic.muted = true;
+    } else {
+        // Restore the intended mute state from localStorage
+        const isBgmMuted = localStorage.getItem('bgmMuted') === 'true';
+        bgMusic.muted = isBgmMuted;
+    }
+});

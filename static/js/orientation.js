@@ -111,15 +111,19 @@
     const isFullscreen = !!document.fullscreenElement;
     const isLandscapeOrientation = screen.orientation?.type.startsWith('landscape') ?? false;
     const isMobile = isMobileDevice();
-
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  
     if (isMobile) {
-      if (isFullscreen && !isPortrait && isLandscapeOrientation) {
+      if (
+        (isIOS && !isPortrait) || // ✅ iOS in landscape
+        (!isIOS && isFullscreen && !isPortrait && isLandscapeOrientation) // ✅ non-iOS
+      ) {
         overlay.style.display = 'none';
-        exitBtn.style.display = 'inline-block';
+        exitBtn.style.display = isIOS ? 'none' : 'inline-block';
         if (fullscreenBtn) fullscreenBtn.style.display = 'none';
       } else {
         overlay.style.display = 'flex';
-        if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
+        if (fullscreenBtn) fullscreenBtn.style.display = isIOS ? 'none' : 'inline-block';
         exitBtn.style.display = 'none';
       }
     } else {
@@ -128,6 +132,7 @@
       exitBtn.style.display = 'none';
     }
   }
+  
 
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement) {

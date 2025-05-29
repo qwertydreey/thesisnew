@@ -196,53 +196,113 @@ def emoji_math(question: str):
     # Addition
     if any(op in question for op in ["add", "addition", "plus", "+"]):
         if n1 <= MAX_EMOJIS and n2 <= MAX_EMOJIS:
-            return f"{emoji * n1} + {emoji * n2} = ?"
+            lines = []
+            lines.append("Please count the emoji below\n")
+            lines.append("Addition means putting two groups together to find out how many there are in total.\n")
+            lines.append(f"Here is the first group of {n1} {emoji}:\n")
+            lines.append(f"{emoji * n1}\n")
+            lines.append(f"Here is the second group of {n2} {emoji}:\n")
+            lines.append(f"{emoji * n2}\n")
+            lines.append("Now, let's put them together:\n")
+            lines.append(f"{emoji * (n1 + n2)}\n")
+            lines.append("How many are there in total?")
+            return '\n'.join(lines)
         else:
             return None
+
 
     # Subtraction (ensure n1 >= n2 to avoid negative emojis)
     if any(op in question for op in ["subtract", "subtraction", "minus", "-"]) and n1 >= n2:
         if n1 <= MAX_EMOJIS and n2 <= MAX_EMOJIS:
-            return f"{emoji * n1} - {emoji * n2} = ?"
+            lines = []
+            lines.append("Please count the emoji below\n")
+            lines.append("Subtraction helps us find out how many are left when some are taken away.\n")
+            lines.append(f"Imagine you have {n1} {emoji}, but then you give away {n2} {emoji}.\n")
+            lines.append(f"Here are your {n1} {emoji}:\n")
+            lines.append(f"{emoji * n1}\n")
+            # Show the remaining emojis after taking away n2 emojis
+            remaining = n1 - n2
+            lines.append(f"After giving away {n2} {emoji}, you have:\n")
+            lines.append(f"{emoji * remaining}\n")
+            lines.append("How many do you think are left?")
+            return '\n'.join(lines)
         else:
             return None
+
+
 
     # Multiplication (show n1 groups each containing n2 emojis)
     if any(op in question for op in ["multiply", "multiplication", "times", "x", "*"]):
         total = n1 * n2
         if total <= MAX_EMOJIS:
-            group_emoji = emoji * n2
-            groups = ' '.join([group_emoji] * n1)
-            return f"{groups} = ?"
+            lines = []
+            lines.append("Multiplication is like having several groups of the same number of things!\n")
+            lines.append(f"Imagine you have {n1} baskets, and each basket has {n2} {emoji} inside.\n")
+            lines.append("Let's look at each basket:\n")
+            for i in range(n1):
+                lines.append(f"Basket {i+1}: {emoji * n2}\n")
+            lines.append("Now, let's count all the emojis in all the baskets together.\n")
+            lines.append("Can you figure out how many emojis there are in total?")
+            return '\n'.join(lines)
         else:
             return None
 
-    # Division (show n2 groups each containing n1/n2 emojis, only if exact division)
+
+    # Division (clean version — no repeated line)
     if any(op in question for op in ["divide", "division", "/"]):
         if n1 <= MAX_EMOJIS and n2 != 0 and n1 % n2 == 0:
             group_size = n1 // n2
-            group_emoji = emoji * group_size
-            groups = ' '.join([group_emoji] * n2)
-            return f"{groups} = ?"
+            lines = []
+            lines.append("Please count the emoji below\n")
+            lines.append(f"Let's divide {n1} {emoji} into {n2} equal groups.\n")
+            lines.append(f"We want to share {n1} {emoji} equally into {n2} groups.\n")
+            lines.append(f"Each group will have some {emoji}. Let's see how many:\n")
+            for i in range(n2):
+                lines.append(f"Group {i+1}: {emoji * group_size}")
+            lines.append(f"So, each group has {group_size} {emoji}.\n")
+            return '\n'.join(lines)
         else:
             return None
 
+
     # Comparison
-    if any(op in question for op in ["greater than", "less than", "equal"]):
+    if any(op in question for op in ["greater than", "less than", "equal", "greater", "less", "which is greater", "which is less"]):
         if n1 <= MAX_EMOJIS and n2 <= MAX_EMOJIS:
-            return f"{emoji * n1} ? {emoji * n2}"
+            emoji1 = emoji
+            emoji2 = random.choice(["🍇", "🍍", "🍉", "🍎", "🍓"])  # Different emoji for contrast
+
+            lines = []
+            lines.append("Let's learn about comparing numbers and groups!\n")
+            lines.append(f"{emoji1 * n1} ({n1})  ?  {emoji2 * n2} ({n2})\n")
+            lines.append("Look carefully at these two groups of fruits.")
+            lines.append(f"Group 1 has {n1} {emoji1}s.")
+            lines.append(f"Group 2 has {n2} {emoji2}s.\n")
+            lines.append("👉 When one number or group is GREATER, it means it has MORE than the other.")
+            lines.append("👉 When one number or group is LESS, it means it has FEWER than the other.")
+            lines.append("👉 When both groups are the SAME, they have EQUAL amounts.\n")
+            lines.append("So, is the first group >, <, or = the second group?")
+            lines.append("Think about it and pick the right symbol!")
+
+            return '\n'.join(lines)
         else:
             return None
+
+
 
     # Counting / word problem hints
     if any(op in question for op in ["count", "how many", "word problem", "more", "fewer", "left"]):
         if n1 <= MAX_EMOJIS:
-            return f"{emoji * n1} ?"
+            lines = []
+            lines.append("Let's practice counting!\n")
+            lines.append("Here are some fruits for you:\n")
+            lines.append(f"{emoji * n1} ({n1})\n")
+            lines.append("Can you count how many fruits are here?")
+            lines.append("Take your time and try to count each fruit carefully.\n")
+            return '\n'.join(lines)
         else:
             return None
 
-    # No matching pattern
-    return None
+
 
 
 
@@ -529,7 +589,7 @@ tips_per_topic = {
         "Comparing numbers helps in real life, like deciding who has more money or points.",
         "Try comparing numbers using objects or pictures to make it fun and easy."
     ],
-    "greater than": [
+    "greater": [
         "Greater than means one number is bigger than another number.",
         "The symbol > shows 'greater than.' Look which number is bigger and put it first.",
         "Try to find the bigger number when comparing two or more numbers.",
@@ -541,7 +601,7 @@ tips_per_topic = {
         "Greater than helps you order numbers from biggest to smallest.",
         "Use greater than when comparing scores, ages, or quantities."
     ],
-    "less than": [
+    "less": [
         "Less than means one number is smaller than another number.",
         "The symbol < shows 'less than.' Look which number is smaller and put it first.",
         "Try to find the smaller number when comparing two or more numbers.",
@@ -848,7 +908,7 @@ def chatbot_api():
         emoji_response = emoji_math(session['last_question'])
         if emoji_response:
             session['step'] = 2.5
-            return jsonify({"reply": f"Please count the emoji below\n\n{emoji_response}\n\nWhat do you think the answer is?"})
+            return jsonify({"reply": f"{emoji_response}\n\nWhat do you think the answer is?"})
 
         step_prompt = f"Give a step-by-step solution without the final answer for this math problem: '{session['last_question']}'. Then ask: 'What do you think the answer is?'"
         try:
@@ -886,7 +946,12 @@ def chatbot_api():
     # Step 3: Provide full solution if asked
     if session['step'] == 3:
         if user_message in yes_responses:
-            full_prompt = f"Give a full step-by-step solution including the final answer for this math problem: '{session['last_question']}'. Keep it short and friendly for Grade 1. End the explanation with the final answer clearly stated at the bottom in bold."
+            full_prompt = (
+                f"Give a full step-by-step solution including the final answer "
+                f"for this math problem: '{session['last_question']}'. "
+                f"Keep it short and friendly for Grade 1. "
+                f"End the explanation with the final answer clearly stated at the bottom in bold."
+            )
             try:
                 system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
                 response = openai.ChatCompletion.create(
@@ -898,21 +963,26 @@ def chatbot_api():
                 )
                 reply = response['choices'][0]['message']['content']
 
-                final_answer_match = re.search(r"(The answer is [0-9]+\.?)", reply, re.IGNORECASE)
-                if final_answer_match:
-                    final_answer_text = final_answer_match.group(1)
-                    reply = re.sub(final_answer_text, f"**{final_answer_text}**", reply)
+                # Remove any "The answer is ..." lines to avoid duplication
+                reply = re.sub(r"(The answer is\s*[0-9]+\.?)", "", reply, flags=re.IGNORECASE).strip()
+
+                # Add consistent final answer line at the bottom if expected_answer is set
+                if session.get("expected_answer") is not None:
+                    reply += f"\n\n**Final Answer: {session['expected_answer']}**"
 
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
+            # Reset session state
             session['step'] = 0
             session['last_question'] = ""
             session['expected_answer'] = None
             session['tip_sent'] = False
+
             return jsonify({"reply": reply})
 
         elif user_message in no_responses:
+            # Reset on no explanation request
             session['step'] = 0
             session['last_question'] = ""
             session['expected_answer'] = None
@@ -920,7 +990,10 @@ def chatbot_api():
             return jsonify({"reply": "Okay! Feel free to ask me another math question anytime."})
 
         else:
-            return jsonify({"reply": "Sorry, your answer is not wrong or not valid please reply with 'YES' or 'NO' if you want the full explanation."})
+            return jsonify({
+                "reply": "Sorry, your answer is not wrong or not valid. "
+                        "Please reply with 'YES' or 'NO' if you want the full explanation."
+            })
 
     # Default fallback
     return jsonify({"reply": "Sorry, I didn't understand that. Please ask a math question or say hello!"})
@@ -928,12 +1001,14 @@ def chatbot_api():
 
 
 
+
 @app.route('/reset-chat-session', methods=['POST'])
 def reset_chat_session():
-    session.pop('last_question', None)
-    session.pop('step', None)
-    session.pop('expected_answer', None)
+    keys_to_clear = ['last_question', 'step', 'expected_answer', 'tip_sent']
+    for key in keys_to_clear:
+        session.pop(key, None)
     return jsonify({"message": "Chat session reset"})
+
 
 
 

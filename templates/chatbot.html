@@ -130,7 +130,6 @@
 const navEntries = performance.getEntriesByType("navigation");
 const isReload = navEntries.length > 0 && navEntries[0].type === 'reload';
 
-// Clear sessionStorage chat only if it's reload
 if (isReload) {
     sessionStorage.removeItem('chatMessages');
     console.log('SessionStorage chatMessages cleared due to page reload.');

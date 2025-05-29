@@ -214,14 +214,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 showRewardBubble(selectedMap);
               })
               .catch(error => {
-                console.error("Error checking skin claim status:", error);
+                // console.error("Error checking skin claim status:", error);
               });
           }
 
         }
       })
       .catch(error => {
-        console.error('Failed to load stage progress:', error);
+        // console.error('Failed to load stage progress:', error);
       });
 });
 
@@ -257,12 +257,12 @@ window.addEventListener('DOMContentLoaded', () => {
             button.closest('button').style.pointerEvents = 'auto';
           }
         } else {
-          console.warn(`Invalid stage id: ${stageId}`);
+          // console.warn(`Invalid stage id: ${stageId}`);
         }
       });
 
     } catch (error) {
-      console.error('Error fetching stage progress:', error);
+      // console.error('Error fetching stage progress:', error);
     }
   }
 
@@ -383,13 +383,13 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log('Skin successfully claimed!');
+                // console.log('Skin successfully claimed!');
             } else {
-                console.error('Failed to claim skin:', data.message);
+                // console.error('Failed to claim skin:', data.message);
             }
         })
         .catch(error => {
-            console.error('Error claiming skin:', error);
+            // console.error('Error claiming skin:', error);
         });
 
         document.getElementById('rewardBubble').classList.add('hidden');

@@ -64,7 +64,7 @@
     
         // Play the cloned audio
         soundClone.play().catch((e) => {
-            console.error('Playback failed:', e);
+            // console.error('Playback failed:', e);
         });
       }
 
@@ -168,7 +168,7 @@
               badgeDiv.appendChild(img);
               medalsGrid.appendChild(badgeDiv);
             } catch (err) {
-              console.error(`Error loading reward for ${map} stage ${stage}:`, err);
+              // console.error(`Error loading reward for ${map} stage ${stage}:`, err);
             }
           }
         }
@@ -195,8 +195,8 @@
       
                   const claimedSkinCodes = data.skins.map(skin => skin.skin_code);
                   const equippedSkinCode = data.equipped_skin;  // from server
-                  console.log('Claimed skins:', claimedSkinCodes);
-                  console.log('Equipped skin:', equippedSkinCode);
+                  // console.log('Claimed skins:', claimedSkinCodes);
+                  // console.log('Equipped skin:', equippedSkinCode);
       
                   const skinMap = {
                       'r1': 'multiplication-stage3-skin',

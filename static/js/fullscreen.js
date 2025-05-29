@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Orientation check
     function checkOrientation() {
-      console.log('Checking orientation:', window.innerWidth, window.innerHeight);
+      // console.log('Checking orientation:', window.innerWidth, window.innerHeight);
       if (window.innerHeight > window.innerWidth) {
         overlay.style.display = 'flex';
-        console.log('Showing overlay (portrait mode)');
+        // console.log('Showing overlay (portrait mode)');
       } else {
         overlay.style.display = 'none';
-        console.log('Hiding overlay (landscape mode)');
+        // console.log('Hiding overlay (landscape mode)');
       }
     }
   

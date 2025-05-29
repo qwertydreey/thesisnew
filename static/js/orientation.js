@@ -1,5 +1,4 @@
 (function () {
-  // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'rotate-warning';
   Object.assign(overlay.style, {
@@ -10,39 +9,71 @@
     height: '100%',
     background: 'linear-gradient(135deg, #1e1e2f 0%, #2c2c3c 100%)',
     zIndex: '99999',
-    display: 'none', // this stays hidden unless portrait
+    display: 'none',
     justifyContent: 'center',
     alignItems: 'center',
     textAlign: 'center',
     padding: '2vh',
     boxSizing: 'border-box',
     flexDirection: 'column',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    overflow: "none"
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
   });
 
-  // Create message box
+  // Main message
   const message = document.createElement('div');
   message.textContent = '🔄 Please rotate your phone to landscape mode to continue.';
   Object.assign(message.style, {
-    fontSize: '3.2vh',
+    fontSize: '3vh',
     color: '#f0f0f0',
     backgroundColor: '#2e2e3e',
-    padding: '2vh 2.5vh',
+    padding: '2vh',
     borderRadius: '1.5vh',
-    boxShadow: '0 1.2vh 2.4vh rgba(0, 0, 0, 0.4)',
+    boxShadow: '0 1vh 2vh rgba(0, 0, 0, 0.4)',
     maxWidth: '90vh',
     lineHeight: '1.5',
-    transition: 'all 0.3s ease',
-    border: '1vh solid #444',
-    overflow: "none"
-
+    marginBottom: '2vh',
+    border: '0.5vh solid #444'
   });
 
   overlay.appendChild(message);
+
+  // Fullscreen button (only if supported)
+  if ('orientation' in screen && screen.orientation.lock && document.documentElement.requestFullscreen) {
+    const fullscreenBtn = document.createElement('button');
+    fullscreenBtn.textContent = '🔳 Enter Fullscreen & Rotate';
+    Object.assign(fullscreenBtn.style, {
+      fontSize: '2.5vh',
+      padding: '1.2vh 2.4vh',
+      borderRadius: '1vh',
+      border: 'none',
+      backgroundColor: '#4a90e2',
+      color: 'white',
+      cursor: 'pointer',
+      boxShadow: '0 0.5vh 1vh rgba(0, 0, 0, 0.3)'
+    });
+
+    fullscreenBtn.addEventListener('click', async () => {
+      try {
+        await document.documentElement.requestFullscreen();
+        await screen.orientation.lock('landscape');
+      } catch (err) {
+        alert('Could not enter fullscreen or lock orientation: ' + err.message);
+      }
+    });
+
+    overlay.appendChild(fullscreenBtn);
+  } else {
+    // Fallback message for iOS or unsupported
+    const fallbackNote = document.createElement('div');
+    fallbackNote.textContent = '📱 If nothing happens, please rotate manually to landscape.';
+    fallbackNote.style.color = '#bbb';
+    fallbackNote.style.marginTop = '2vh';
+    fallbackNote.style.fontSize = '2vh';
+    overlay.appendChild(fallbackNote);
+  }
+
   document.body.appendChild(overlay);
 
-  // Check orientation
   function checkOrientation() {
     if (window.innerHeight > window.innerWidth) {
       overlay.style.display = 'flex';
@@ -51,7 +82,6 @@
     }
   }
 
-  // Wait a tiny bit to ensure DOM is ready (optional safeguard)
   window.addEventListener('load', () => {
     setTimeout(checkOrientation, 50);
   });

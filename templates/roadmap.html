@@ -121,7 +121,7 @@
       const stageData = progress[stageKey];
       const starsEarned = (stageData && stageData.stars) || 0;
 
-      console.log(`Stage Key: ${stageKey}, Stars Earned: ${starsEarned}`); // Debug log
+      // console.log(`Stage Key: ${stageKey}, Stars Earned: ${starsEarned}`); // Debug log
 
       totalStars += starsEarned;
 
@@ -156,13 +156,13 @@
   fetch('/get_stage_progress')
     .then(response => response.json())
     .then(progress => {
-      console.log("Stage Progress:", progress); // Debug log
+      // console.log("Stage Progress:", progress); // Debug log
       maps.forEach(([selector, prefix]) => {
         setStars(selector, prefix, progress);
       });
     })
     .catch(error => {
-      console.error('Failed to load stage progress:', error);
+      // console.error('Failed to load stage progress:', error);
     });
 
 

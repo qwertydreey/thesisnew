@@ -31,9 +31,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   initMapAndStage();
   updateHealthBars();
   
-  console.log(`Selected Map: ${selectedMap}`);
-  console.log(`Selected Stage: ${selectedStageKey}`);
-  console.log(`Current Difficulty: ${currentDifficulty}`);
+  // console.log(`Selected Map: ${selectedMap}`);
+  // console.log(`Selected Stage: ${selectedStageKey}`);
+  // console.log(`Current Difficulty: ${currentDifficulty}`);
 });
 
 
@@ -100,7 +100,7 @@ async function saveProgress() {
 
       const result = await response.json();
       if (result.success) {
-          console.log("Progress saved successfully");
+          // console.log("Progress saved successfully");
       } else {
           console.error("Failed to save progress:", result.message);
       }
@@ -150,7 +150,7 @@ async function loadDifficultyForMap(mapName) {
     const data = await response.json();
 
     if (data.success) {
-      console.log(`✅ Loaded difficulty for ${mapName}: ${data.difficulty}`);
+      // console.log(`✅ Loaded difficulty for ${mapName}: ${data.difficulty}`);
       currentDifficulty = data.difficulty;
       updateDifficultyDisplay();  // Update the difficulty display
       return data.difficulty;
@@ -180,7 +180,7 @@ function updateDifficultyDisplay() {
 // === Difficulty Evaluation ===
 function evaluateDifficulty(correctAnswers, totalQuestionsAnswered) {
   if (totalQuestionsAnswered >= 10) {
-    console.log(`Evaluating difficulty... Correct: ${correctAnswers}, Total: ${totalQuestionsAnswered}`);
+    // console.log(`Evaluating difficulty... Correct: ${correctAnswers}, Total: ${totalQuestionsAnswered}`);
 
     if (correctAnswers >= 8) {
       console.log("✅ Increasing difficulty");
@@ -359,16 +359,16 @@ async function handleAttack() {
   }, 3000);
 
   // Reset wrong counter every time it hits 1
-  if (wrongAnswersCount >= 1) {
-    wrongAnswersCount = 0;
-  }
+  // if (wrongAnswersCount >= 1) {
+  //   wrongAnswersCount = 0;
+  // }
 
   // === RESET COUNTERS AND UPDATE DIFFICULTY IF 10 ANSWERS ===
   if (totalQuestionsAnswered >= 10) {
     currentDifficulty = evaluateDifficulty(correctAnswersCount, totalQuestionsAnswered);
     updateDifficultyDisplay();
 
-    console.log("🔁 Resetting counters after 10 answers...");
+    // console.log("🔁 Resetting counters after 10 answers...");
     await resetCounters(); // ✅ Backend reset
     correctAnswersCount = 0; // ✅ Frontend reset
     wrongAnswersCount = 0;
@@ -401,7 +401,7 @@ async function resetCounters() {
     const data = await response.json();
 
     if (response.ok) {
-      console.log(`✅ Counters reset: ${data.message}`);
+      // console.log(`✅ Counters reset: ${data.message}`);
     } else {
       console.error(`❌ Failed to reset: ${data.message}`);
     }
@@ -874,7 +874,7 @@ function initMapAndStage() {
   spawnMonster(0);
 
   // Log initialization
-  console.log('Map and stage initialized for map:', selectedMap, 'stage:', selectedStage);
+  // console.log('Map and stage initialized for map:', selectedMap, 'stage:', selectedStage);
 }
 
 
@@ -898,7 +898,7 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
 
   // Ensure folder is lowercase to match Linux file system
   const safeFolder = folder.toLowerCase();
-  console.log(safeFolder); 
+  // console.log(safeFolder); 
 
   // ✅ Check if this is the last monster (boss)
   const isFinalBoss = selectedStage === 3 && idx === monstersInStage.length - 1;
@@ -921,7 +921,7 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
   }
 
   const monsterSrc = `/static/images/gameimg/mnstr/${safeFolder}/${m.image}?t=${Date.now()}`;
-  console.log("Monster image source:", monsterSrc);
+  // console.log("Monster image source:", monsterSrc);
 
   monsterImg.src = monsterSrc;
   monsterImg.className = 'monster';
@@ -936,7 +936,7 @@ async function spawnMonster(idx, shouldFetchQuestion = false) {
     monsterNameEl.textContent = m.displayName || m.name.replace(/-/g, ' ');
   }
 
-  console.log('Current difficulty before question fetch:', currentDifficulty);
+  // console.log('Current difficulty before question fetch:', currentDifficulty);
 
   if (!isMonsterSpawnAnimationInProgress) {
     isMonsterSpawnAnimationInProgress = true;
@@ -1103,7 +1103,7 @@ function startMonsterSpawnAnimation() {
     if (currentPlayerHealth > 0) {
       currentPlayerHealth--;
       updateHealthBars();
-      console.log('💔 Player HP →', currentPlayerHealth);
+      // console.log('💔 Player HP →', currentPlayerHealth);
     }
   
     // Play player damage sound
@@ -1137,11 +1137,11 @@ function startMonsterSpawnAnimation() {
   
         // 1) Trigger death animation
         monsterImg.classList.add('monster-death');
-        console.log("Death animation added");
+        // console.log("Death animation added");
   
         // 2) Wait for animation to complete
         monsterImg.addEventListener('animationend', function onDeath() {
-          console.log("Death animation ended");
+          // console.log("Death animation ended");
           monsterImg.removeEventListener('animationend', onDeath);
   
           // 3) Keep the monster there for 2s, but fade it out smoothly
@@ -1432,7 +1432,7 @@ function updateStageProgress(selectedMap, selectedStage, starsEarned = 1) {
       fetch(`/get_stage_progress?map=${selectedMap}`)
         .then(response => response.json())
         .then(stageProgress => {
-          console.log("Fetched Stage Progress:", stageProgress); // Log the fetched data
+          // console.log("Fetched Stage Progress:", stageProgress); // Log the fetched data
           updateRoadmapStars(selectedMap, stageProgress);
         })
         .catch(error => {
@@ -1670,192 +1670,177 @@ function updatePotionUI() {
 
 
 
-function fireballAttack() {
-  if (sessionStorage.getItem('fireballTriggered')) return;
+// Global cache variable for equipped skin
+let cachedEquippedSkin = null;
 
-  const groundContainer = document.querySelector(".ground");
-  const player = document.querySelector(".player");
-  const monster = document.querySelector(".monster");
+// Preload image helper
+function preloadImage(url) {
+  const img = new Image();
+  img.src = url;
+}
 
-  // Add charging animation to player at start
-  player.classList.add("charging");
+// Preload all relevant skin images
+function preloadSkinImages(skin) {
+  preloadImage(skin.src);
+  preloadImage(skin.attackSrc);
+  preloadImage(skin.fireballSrc);
+}
 
-  // Play fireball charging sound
-  playSound('/static/sfx/attack.mp3', 100); // Flask static URL for fireball sound
-
-  // Fetch equipped skin from backend
+// Preload equipped skin once at game start (call this early in your code)
+function preloadEquippedSkin() {
   fetch('/get_user_skins')
     .then(response => response.json())
     .then(data => {
       if (data.error) {
         console.error("Error fetching equipped skin:", data.error);
-        // Remove charging if error fetching skin
-        player.classList.remove("charging");
         return;
       }
-
-      // Get equipped skin or fallback
       const equippedSkinId = data.equipped_skin || 'default-skin';
-      const skin = skins.find(s => s.id === equippedSkinId) || skins[0];
-      const selectedAttack = skin.fireballSrc;
-
-      // Create fireball element with correct skin fireball image
-      const fireball = document.createElement("img");
-      fireball.src = selectedAttack;
-      fireball.classList.add("fireball");
-
-      // Position fireball at player start point
-      fireball.style.left = `${player.offsetLeft + player.offsetWidth}px`;
-      fireball.style.bottom = "120px";
-
-      // Append fireball after short delay for charging effect
-      setTimeout(() => {
-        // Change player image to attack pose
-        player.src = skin.attackSrc;
-        player.style.height = "35vh";
-        player.style.width = "auto";
-
-        // Add fireball to the ground container (appear and move)
-        groundContainer.appendChild(fireball);
-        sessionStorage.setItem('fireballTriggered', true);
-
-        // Play fireball hit sound after slight delay
-        playSound('/static/sfx/damaged.mp3', 500);
-
-        // Monster visual damage animation sequence
-        setTimeout(() => {
-          monster.classList.add("damaged");
-          setTimeout(() => {
-            monster.classList.remove("damaged");
-          }, 600);
-        }, 770);
-
-        // Shake effect after damage
-        setTimeout(() => {
-          monster.classList.add("shake");
-          setTimeout(() => {
-            monster.classList.remove("shake");
-          }, 600);
-        }, 1100);
-
-        // Apply damage and check if monster dies
-        setTimeout(() => {
-          const damage = 1;
-          currentMonsterHealth -= damage;
-          updateHealthBars();
-
-          if (currentMonsterHealth <= 0) {
-            isMonsterDeathAnimationInProgress = true;
-            monster.classList.add("monster-death");
-            playSound('/static/sfx/deathanim.mp3', 0);
-
-            // Wait for death animation end
-            const onDeath = () => {
-              monster.removeEventListener("animationend", onDeath);
-              monster.classList.remove("monster-death");
-              currentMonsterIndex++;
-              spawnMonster(currentMonsterIndex, true);
-              isMonsterDeathAnimationInProgress = false;
-            };
-            monster.addEventListener("animationend", onDeath);
-          }
-        }, 1400);
-
-        // Remove fireball after animation
-        setTimeout(() => {
-          fireball.remove();
-          sessionStorage.removeItem('fireballTriggered');
-        }, 1000);
-
-        // Reset player to idle and remove charging effect
-        setTimeout(() => {
-          player.src = skin.src;
-          player.style.height = "35vh";
-          player.style.width = "auto";
-          player.classList.remove("charging");
-
-          // Handle freeze turns decrement & display update
-          if (freezeTurns > 0) {
-            freezeTurns--;
-            if (freezeTurns === 0) {
-              setTimeout(() => {
-                removeFreezeEffect();
-                freezeTurnsDisplay.style.display = 'none';
-                console.log("⏹ Freeze effect has ended.");
-              }, 100);
-            }
-            updateFreezeTurnsDisplay();
-          }
-        }, 700);
-
-      }, 600);
+      cachedEquippedSkin = skins.find(s => s.id === equippedSkinId) || skins[0];
+      // console.log("✅ Cached equipped skin:", cachedEquippedSkin);
+      preloadSkinImages(cachedEquippedSkin);
     })
     .catch(error => {
       console.error("Error fetching equipped skin:", error);
-      // Remove charging if error fetching skin
-      player.classList.remove("charging");
     });
 }
 
+// Call this once at the start of your game or page load
+preloadEquippedSkin();
 
+// Function to set player images for spawn and idle
+function setPlayerImages(spawn, player, skin) {
+  player.src = skin.src;
+  spawn.src = skin.src;
 
+  setTimeout(() => {
+    spawn.classList.add("hidden");
+    player.classList.remove("hidden");
+  }, 1000);
+}
 
+function fireballAttack() {
+  if (sessionStorage.getItem('fireballTriggered')) return;
 
+  if (!cachedEquippedSkin) {
+    // console.warn("⏳ Equipped skin not loaded yet. Retrying in 300ms...");
+    setTimeout(fireballAttack, 300);
+    return;
+  }
+
+  const groundContainer = document.querySelector(".ground");
+  const player = document.querySelector(".player");
+  const monster = document.querySelector(".monster");
+
+  player.classList.add("charging");
+  playSound('/static/sfx/attack.mp3', 100);
+
+  const skin = cachedEquippedSkin;
+  const selectedAttack = skin.fireballSrc;
+
+  const fireball = document.createElement("img");
+  fireball.src = selectedAttack;
+  fireball.classList.add("fireball");
+  fireball.style.left = `${player.offsetLeft + player.offsetWidth}px`;
+  fireball.style.bottom = "120px";
+
+  // Reduced delay to 300ms for faster fireball launch
+  setTimeout(() => {
+    player.src = skin.attackSrc;
+    player.style.height = "35vh";
+    player.style.width = "auto";
+
+    groundContainer.appendChild(fireball);
+    sessionStorage.setItem('fireballTriggered', true);
+    playSound('/static/sfx/damaged.mp3', 500);
+
+    setTimeout(() => {
+      monster.classList.add("damaged");
+      setTimeout(() => monster.classList.remove("damaged"), 600);
+    }, 770);
+
+    setTimeout(() => {
+      monster.classList.add("shake");
+      setTimeout(() => monster.classList.remove("shake"), 600);
+    }, 1100);
+
+    setTimeout(() => {
+      const damage = 1;
+      currentMonsterHealth -= damage;
+      updateHealthBars();
+
+      if (currentMonsterHealth <= 0) {
+        isMonsterDeathAnimationInProgress = true;
+        monster.classList.add("monster-death");
+        playSound('/static/sfx/deathanim.mp3', 0);
+
+        const onDeath = () => {
+          monster.removeEventListener("animationend", onDeath);
+          monster.classList.remove("monster-death");
+          currentMonsterIndex++;
+          spawnMonster(currentMonsterIndex, true);
+          isMonsterDeathAnimationInProgress = false;
+        };
+        monster.addEventListener("animationend", onDeath);
+      }
+    }, 1400);
+
+    setTimeout(() => {
+      fireball.remove();
+      sessionStorage.removeItem('fireballTriggered');
+    }, 1000);
+
+    setTimeout(() => {
+      player.src = skin.src;
+      player.style.height = "35vh";
+      player.style.width = "auto";
+      player.classList.remove("charging");
+
+      if (freezeTurns > 0) {
+        freezeTurns--;
+        if (freezeTurns === 0) {
+          setTimeout(() => {
+            removeFreezeEffect();
+            freezeTurnsDisplay.style.display = 'none';
+            // console.log("⏹ Freeze effect has ended.");
+          }, 100);
+        }
+        updateFreezeTurnsDisplay();
+      }
+    }, 700);
+  }, 300);
+}
 
 document.addEventListener("DOMContentLoaded", function () {
   const spawn = document.getElementById("player-spawn");
   const player = document.getElementById("player-idle");
 
-  // Check if elements exist before proceeding
   if (!spawn || !player) {
-    console.error("Player elements not found in the DOM");
+    // console.error("Player elements not found in the DOM");
     return;
   }
 
-  // Fetch the equipped skin from the server (GET request to '/get_user_skins')
-  fetch('/get_user_skins')
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        console.error('Error fetching user skins:', data.error);
-        return;
+  if (!cachedEquippedSkin) {
+    // console.warn("Skin not cached yet. Waiting to set images...");
+    setTimeout(() => {
+      if (cachedEquippedSkin) {
+        setPlayerImages(spawn, player, cachedEquippedSkin);
       }
+    }, 500);
+    return;
+  }
 
-      // Get the equipped skin from the server response
-      const equippedSkinId = data.equipped_skin || 'default-skin'; // Default to 'default-skin' if no equipped skin
-      console.log("Equipped skin ID from server:", equippedSkinId);
-
-      // Find the skin by its ID in the skins array or default to the first skin if none is found
-      const skin = skins.find(s => s.id === equippedSkinId) || skins[0];
-      console.log("Using skin:", skin);
-
-      // Set the idle and spawn images based on the equipped skin
-      player.src = skin.src;  // Set the idle image
-      spawn.src = skin.src;   // Set the spawn image
-
-      setTimeout(() => {
-        // Hide the spawn image after the spawn effect duration
-        spawn.classList.add("hidden");
-
-        // Instantly show the player (idle state) without animation delay
-        player.classList.remove("hidden");
-      }, 1000); // Adjust this delay if needed
-    })
-    .catch(error => {
-      console.error('Error fetching skins:', error);
-    });
+  setPlayerImages(spawn, player, cachedEquippedSkin);
 });
 
-
-
-
-// For the monster image (if needed, based on other skins or states)
+// Optional: monster related setup (currently empty)
 window.addEventListener("DOMContentLoaded", () => {
   const monster = document.querySelector(".monster");
   if (monster) {
-
+    // Any monster init code here
   }
 });
+
 
 
 
@@ -2036,7 +2021,7 @@ function useThunderPotion() {
   }
 
   if (currentMonsterHealth <= 0) {
-    console.log("❌ Monster is already defeated. Thunder Potion cannot be used.");
+    // console.log("❌ Monster is already defeated. Thunder Potion cannot be used.");
     return;
   }
 
@@ -2055,7 +2040,7 @@ function useThunderPotion() {
         resetFrames();
       }
 
-      console.log("Thunder Potion used!");
+      // console.log("Thunder Potion used!");
 
       animationInterval = setInterval(changeFrame, 80); // Faster lightning animation
 
@@ -2077,7 +2062,7 @@ function useThunderPotion() {
             }, 150);
           }, 320);
         } else {
-          console.log("❄️ Monster is frozen — no damage animation.");
+          // console.log("❄️ Monster is frozen — no damage animation.");
           if (currentMonsterHealth > 0) {
             monsterTakeDamage();
           }
@@ -2087,7 +2072,7 @@ function useThunderPotion() {
         }
       }, 520);
     } else {
-      console.log("❌ Monster is already defeated. Thunder Potion cannot be used.");
+      // console.log("❌ Monster is already defeated. Thunder Potion cannot be used.");
       setTimeout(() => {
         isThunderPotionInUse = false;
       }, 150);

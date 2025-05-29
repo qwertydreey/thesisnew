@@ -7,6 +7,7 @@ import os
 import mysql.connector
 import openai
 import re
+import random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this later
@@ -173,6 +174,78 @@ def register():
 openai.api_base = "https://openrouter.ai/api/v1"
 openai.api_key = "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"  # ← Replace this with your OpenRouter API Key
 
+# 👇 Add this function above your chatbot_api route
+
+
+
+import re
+import random
+
+def emoji_math(question: str):
+    question = question.lower().strip()
+    numbers = list(map(int, re.findall(r'\d+', question)))
+    if len(numbers) != 2:
+        return None  # This function only supports 2-number questions
+
+    n1, n2 = numbers
+
+    MAX_EMOJIS = 20
+    emojis = ["🍎", "🍉", "🍓", "🎂", "🍭"]
+    emoji = random.choice(emojis)
+
+    # Addition
+    if any(op in question for op in ["add", "addition", "plus", "+"]):
+        if n1 <= MAX_EMOJIS and n2 <= MAX_EMOJIS:
+            return f"{emoji * n1} + {emoji * n2} = ?"
+        else:
+            return None
+
+    # Subtraction (ensure n1 >= n2 to avoid negative emojis)
+    if any(op in question for op in ["subtract", "subtraction", "minus", "-"]) and n1 >= n2:
+        if n1 <= MAX_EMOJIS and n2 <= MAX_EMOJIS:
+            return f"{emoji * n1} - {emoji * n2} = ?"
+        else:
+            return None
+
+    # Multiplication (show n1 groups each containing n2 emojis)
+    if any(op in question for op in ["multiply", "multiplication", "times", "x", "*"]):
+        total = n1 * n2
+        if total <= MAX_EMOJIS:
+            group_emoji = emoji * n2
+            groups = ' '.join([group_emoji] * n1)
+            return f"{groups} = ?"
+        else:
+            return None
+
+    # Division (show n2 groups each containing n1/n2 emojis, only if exact division)
+    if any(op in question for op in ["divide", "division", "/"]):
+        if n1 <= MAX_EMOJIS and n2 != 0 and n1 % n2 == 0:
+            group_size = n1 // n2
+            group_emoji = emoji * group_size
+            groups = ' '.join([group_emoji] * n2)
+            return f"{groups} = ?"
+        else:
+            return None
+
+    # Comparison
+    if any(op in question for op in ["greater than", "less than", "equal"]):
+        if n1 <= MAX_EMOJIS and n2 <= MAX_EMOJIS:
+            return f"{emoji * n1} ? {emoji * n2}"
+        else:
+            return None
+
+    # Counting / word problem hints
+    if any(op in question for op in ["count", "how many", "word problem", "more", "fewer", "left"]):
+        if n1 <= MAX_EMOJIS:
+            return f"{emoji * n1} ?"
+        else:
+            return None
+
+    # No matching pattern
+    return None
+
+
+
 
 
 allowed_interactions = {
@@ -212,9 +285,9 @@ def compute_answer(question: str):
             return int(numbers[0] + numbers[1])
         elif any(op in question for op in ["subtract", "minus", "-"]):
             return int(numbers[0] - numbers[1])
-        elif any(op in question for op in ["multiply", "times", "*"]):
+        elif any(op in question.lower() for op in ["multiply", "multiplication", "times", "x", "*"]):
             return int(numbers[0] * numbers[1])
-        elif any(op in question for op in ["divide", "division", "/"]):
+        elif any(op in question for op in ["divide", "division", "/", "divided by", "over", "÷"]):
             if numbers[1] == 0:
                 return None
             return int(numbers[0] / numbers[1])
@@ -223,11 +296,22 @@ def compute_answer(question: str):
     except:
         return None
 
+
 def check_answer(user_answer: str, expected_answer) -> bool:
     try:
-        return int(user_answer) == int(expected_answer)
-    except:
+        numbers = re.findall(r'\d+\.?\d*', user_answer)
+        print(f"Extracted numbers from user answer: {numbers}")
+        if not numbers:
+            return False
+        user_num = int(float(numbers[0]))
+        expected_num = int(float(expected_answer))
+        print(f"User number: {user_num}, Expected number: {expected_num}")
+        return user_num == expected_num
+    except Exception as e:
+        print(f"Error in check_answer: {e}")
         return False
+
+
 
 @app.route('/chatbot-api', methods=['POST'])
 def chatbot_api():
@@ -273,7 +357,6 @@ def chatbot_api():
         session['expected_answer'] = compute_answer(user_message)
         session['step'] = 1
 
-    # Step 1: Give simple tip and ask if user wants more help
     if session['step'] == 1:
         if user_message in yes_responses:
             session['step'] = 2
@@ -283,10 +366,9 @@ def chatbot_api():
             session['expected_answer'] = None
             return jsonify({"reply": "Alright! Let me know if you have another math question."})
         else:
-            # Generate tip from OpenAI
-            tip_prompt = f"Give a simple tip to solve this math problem without giving the answer: '{session['last_question']}'. End by asking: 'Would you like more help?' Keep it short and friendly for Grade 1."
             try:
-                system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
+                system_prompt = "You are Counticus, a friendly Grade 1 math tutor. Explain simply."
+                tip_prompt = f"Explain simply how to solve this math problem without giving the answer: '{session['last_question']}'. End by asking: 'Would you like more help?'"
                 response = openai.ChatCompletion.create(
                     model="mistralai/mistral-7b-instruct:free",
                     messages=[
@@ -294,29 +376,59 @@ def chatbot_api():
                         {"role": "user", "content": tip_prompt}
                     ]
                 )
+                tip_reply = response['choices'][0]['message']['content']
+
+                # Basic check if tip_reply is too complicated, fallback to canned tip
+                if len(tip_reply) > 300:  # or some heuristic
+                    tip_reply = (
+                        "Hi! When you add numbers, you just put them together. "
+                        "For example, if you have 1 apple and 1 more apple, how many apples do you have? "
+                        "Try counting them one by one! "
+                        "Would you like more help?"
+                    )
+
+                final_reply = f"{tip_reply}\n\n👇 Please answer YES or NO 👇"
+                return jsonify({"reply": final_reply})
+
+            except Exception as e:
+                # fallback canned tip if error
+                return jsonify({"reply": (
+                    "Hi! When you add numbers, you just put them together. "
+                    "For example, if you have 1 apple and 1 more apple, how many apples do you have? "
+                    "Try counting them one by one! "
+                    "Would you like more help?\n\n👇 Please answer YES or NO 👇"
+                )})
+
+
+
+# Step 2: Provide step-by-step solution without final answer, then ask for user's answer
+        if session['step'] == 2:
+            emoji_response = emoji_math(session['last_question'])
+            if emoji_response:
+                session['step'] = 2.5
+                return jsonify({"reply": f"plase count the emoji below\n\n{emoji_response}\n\nWhat do you think the answer is?"})
+
+            # fallback to openAI explanation
+
+
+            # Fallback to OpenAI if not emoji-suitable
+            step_prompt = f"Give a step-by-step solution without the final answer for this math problem: '{session['last_question']}'. Then ask: 'What do you think the answer is?'"
+            try:
+                system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": step_prompt}
+                    ]
+                )
                 reply = response['choices'][0]['message']['content']
-                return jsonify({"reply": reply})
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
-    # Step 2: Provide step-by-step solution without final answer, then ask for user's answer
-    if session['step'] == 2:
-        step_prompt = f"Give a step-by-step solution without the final answer for this math problem: '{session['last_question']}'. Then ask: 'What do you think the answer is?' Keep it short and friendly for Grade 1."
-        try:
-            system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
-            response = openai.ChatCompletion.create(
-                model="mistralai/mistral-7b-instruct:free",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": step_prompt}
-                ]
-            )
-            reply = response['choices'][0]['message']['content']
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            session['step'] = 2.5
+            return jsonify({"reply": reply})
 
-        session['step'] = 2.5
-        return jsonify({"reply": reply})
 
     # Step 2.5: Check user's answer, if correct reset else ask if want full explanation
     if session['step'] == 2.5:
@@ -334,10 +446,9 @@ def chatbot_api():
                 session['step'] = 3
                 return jsonify({"reply": "That's not quite right. Would you like me to explain the full solution?"})
 
-    # Step 3: Give full solution with final answer or end
     if session['step'] == 3:
         if user_message in yes_responses:
-            full_prompt = f"Give a full step-by-step solution including the final answer for this math problem: '{session['last_question']}'. Keep it short and friendly for Grade 1."
+            full_prompt = f"Give a full step-by-step solution including the final answer for this math problem: '{session['last_question']}'. Keep it short and friendly for Grade 1. End the explanation with the final answer clearly stated at the bottom in bold."
             try:
                 system_prompt = "You are Counticus, a friendly Grade 1 math tutor."
                 response = openai.ChatCompletion.create(
@@ -348,6 +459,15 @@ def chatbot_api():
                     ]
                 )
                 reply = response['choices'][0]['message']['content']
+
+                # Optional: ensure final answer is bold at the bottom if client supports Markdown
+                # For example, if the reply ends with "The answer is 4.", replace with bold
+                import re
+                final_answer_match = re.search(r"(The answer is [0-9]+\.?)", reply, re.IGNORECASE)
+                if final_answer_match:
+                    final_answer_text = final_answer_match.group(1)
+                    reply = re.sub(final_answer_text, f"**{final_answer_text}**", reply)
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
@@ -356,6 +476,7 @@ def chatbot_api():
             session['expected_answer'] = None
             return jsonify({"reply": reply})
 
+
         elif user_message in no_responses:
             session['step'] = 0
             session['last_question'] = ""
@@ -363,7 +484,7 @@ def chatbot_api():
             return jsonify({"reply": "Okay! Feel free to ask me another math question anytime."})
 
         else:
-            return jsonify({"reply": "Sorry, your answer is not valid please reply with 'yes' or 'no' if you want the full explanation."})
+            return jsonify({"reply": "Sorry, your answer is not wrong or not valid please reply with 'YES' or 'NO' if you want the full explanation."})
 
     # Default fallback
     return jsonify({"reply": "Sorry, I didn't understand that. Please ask a math question or say hello!"})
@@ -852,6 +973,7 @@ def get_user_skins():
     if not user_id:
         return jsonify({'error': 'User not logged in'}), 401
 
+    cursor = None
     try:
         cursor = db.cursor()
 
@@ -878,7 +1000,8 @@ def get_user_skins():
         print(f"Error fetching user skins: {e}")
         return jsonify({'error': 'Internal server error'}), 500
     finally:
-        cursor.close()
+        if cursor:
+            cursor.close()
 
 
 

@@ -8,7 +8,7 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/monster_atlas.css') }}">
 </head>
-<body data-bgm="/static/bgm/Atlas.mp3">
+<body data-page="monsterAtlas" data-bgm="/static/bgm/Atlas.mp3">
   <img src="{{ url_for('static', filename='images/atlasimg/bg.png') }}" alt="bg" class="bg"/> 
 
   
@@ -28,25 +28,32 @@
     <div id="monster-track"></div>
 
     <div id="monster-info">
-        <!-- Split image and text into separate containers -->
-         <div class="monster-container">
+      <!-- Monster image section -->
+      <div class="monster-container">
         <div id="monster-image"></div>
       </div>
+    
+      <!-- Scroll background + monster details grouped -->
+      <div class="monster-details-wrapper">
+        <img src="{{ url_for('static', filename='images/atlasimg/Scroll.png') }}" class="scroll" alt="scroll"/>
+    
         <div id="monster-details">
           <div class="monster-name"></div>
           <div class="monster-type"></div>
           <div class="monster-desc"></div>
         </div>
+      </div>
     </div>
-
+    
+    <!-- Navigation buttons -->
     <div id="monster-navigation">
-        <button id="prev-btn" onclick="playButtonClickSound()"></button>
-        <button id="next-btn"onclick="playButtonClickSound()"></button>
+      <button id="prev-btn" onclick="playButtonClickSound()"></button>
+      <button id="next-btn" onclick="playButtonClickSound()"></button>
     </div>
-
-
-<img src="{{ url_for('static', filename='images/atlasimg/Tome.png') }}" class="tome" alt="tome"/>
-<img src="{{ url_for('static', filename='images/atlasimg/Scroll.png') }}" class="scroll" alt="scroll"/>
+    
+    <!-- Keep Tome image if still needed elsewhere -->
+    <img src="{{ url_for('static', filename='images/atlasimg/Tome.png') }}" class="tome" alt="tome"/>
+    
 
 
 
@@ -402,6 +409,7 @@ nextBtn.addEventListener('click', function () {
     }, 400); // 400ms delay
   }
 </script>
+<script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
 <script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 

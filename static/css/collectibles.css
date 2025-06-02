@@ -98,16 +98,63 @@ body {
 
 
 .badge-image {
-  position: absolute;
-  width: auto; /* Keeps badge image aspect ratio */
+  position: relative; /* changed from absolute para hindi mag-overlap yung dropdown */
+  width: auto;
   height: 15vh;
-  transition: opacity 0.3s, filter 0.3s; /* Smooth transition for grayscale/opacity */
+  transition: opacity 0.3s, filter 0.3s;
   user-select: none;
-  -webkit-user-drag: none; /* Prevents dragging in Safari/Chrome */
-  -webkit-user-select: none; /* Prevents text/image selection in WebKit */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE/Edge */
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
+.badge-image:hover {
+  opacity: 1;
+  filter: brightness(1.2);
+}
+
+.badge-info {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -100px;
+  background: rgb(255, 255, 255); /* Darker bg para mas gaming vibe */
+  padding: 10px 16px;
+  border-radius: 12px; /* rounder corners */
+  width: 180px;
+  color: #000000;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: white;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  z-index: 100;
+  text-align: center;
+  white-space: normal;
+}
+
+.badge-container:hover .badge-info {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.badge-info::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid rgb(255, 255, 255);
+}
+
 
 /* Adjust positions of specific badges by using custom classes */
 #multiplication-stage1-claimed {
@@ -476,6 +523,3 @@ body {
           drop-shadow(0 0 18px rgba(0, 0, 0, 0.4)); /* Even larger shadow for deeper effect */
 }
 
-
-
-  

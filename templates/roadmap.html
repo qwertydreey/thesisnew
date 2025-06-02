@@ -6,7 +6,7 @@
   <title>Roadmap</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/roadmap.css') }}" />
 </head>
-<body data-bgm="/static/bgm/roadmap.mp3">
+<body data-page="roadmap" data-bgm="/static/bgm/roadmap.mp3">
   <div class="roadmap-wrapper">
     <div class="roadmap-content">
       <!-- Background Image -->
@@ -203,6 +203,7 @@
     }, 350); // Adjust delay to your liking
   }
 </script>
+<script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
 <script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 

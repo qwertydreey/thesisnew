@@ -1368,19 +1368,22 @@ def claim_reward():
 @app.route('/check_reward_claimed', methods=['POST'])
 def check_reward_claimed():
     try:
-        # Retrieve the user ID from session
+        db.ping(reconnect=True, attempts=3, delay=5)  # <-- reconnect if needed
+
         user_id = session.get('user_id')
+        print(f"Session user_id: {user_id}")
+
         if not user_id:
             return jsonify({"error": "User not logged in"}), 400
 
-        # Retrieve map and stage from the request
         map_name = request.json.get('map')
         stage_number = request.json.get('stage')
+
+        print(f"Received map: {map_name}, stage: {stage_number}")
 
         if not map_name or not stage_number:
             return jsonify({"error": "Map and stage are required"}), 400
 
-        # SQL query to check if the reward has been claimed
         cursor.execute("""
             SELECT claimed
             FROM stage_rewards_claimed
@@ -1388,21 +1391,21 @@ def check_reward_claimed():
         """, (user_id, map_name, stage_number))
 
         reward_claimed = cursor.fetchone()
-        
-        # Log the result of the query
-        print(f"Reward claimed for user {user_id} on {map_name} stage {stage_number}: {reward_claimed}")
+        print(f"DB query result: {reward_claimed}")
 
         if reward_claimed is None:
             return jsonify({"claimed": False})
 
-        # Access the value correctly from the query result
-        claimed = reward_claimed['claimed'] if reward_claimed else 0
+        claimed = reward_claimed['claimed'] if isinstance(reward_claimed, dict) else reward_claimed[0]
 
         return jsonify({"claimed": bool(claimed)})
 
     except Exception as e:
+        import traceback
         print(f"Error in /check_reward_claimed: {e}")
+        traceback.print_exc()
         return jsonify({"error": "Internal server error"}), 500
+
 
 
 
@@ -1785,6 +1788,61 @@ def reset_counters():
         cursor.close()
         connection.close()
 
+
+
+@app.route('/api/tutorial-status')
+def tutorial_status():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'tutorial_done': False})
+
+    tutorial_key = request.args.get('tutorialKey')
+    if not tutorial_key:
+        return jsonify({'error': 'Missing tutorialKey parameter'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT completed FROM user_tutorials
+        WHERE user_id = %s AND tutorial_key = %s
+    """, (user_id, tutorial_key))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not row:
+        # No record means tutorial not completed yet
+        return jsonify({'tutorial_done': False})
+
+    return jsonify({'tutorial_done': bool(row['completed'])})
+
+
+@app.route('/api/tutorial-complete', methods=['POST'])
+def tutorial_complete():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+
+    data = request.get_json()
+    tutorial_key = data.get('tutorialKey') if data else None
+    if not tutorial_key:
+        return jsonify({'success': False, 'error': 'Missing tutorialKey'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Upsert pattern: Insert or update if exists
+    cursor.execute("""
+        INSERT INTO user_tutorials (user_id, tutorial_key, completed, completed_at)
+        VALUES (%s, %s, 1, NOW())
+        ON DUPLICATE KEY UPDATE completed = 1, completed_at = NOW()
+    """, (user_id, tutorial_key))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(debug=True)

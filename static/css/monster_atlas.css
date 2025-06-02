@@ -35,7 +35,7 @@ html, body {
     position: absolute;
     width: auto;
     height: 53vh;
-    top: 38vh;
+    top: 0vh;
     left: 50%;
     transform: translateX(-50%);
     z-index: -1;
@@ -156,7 +156,17 @@ html, body {
     z-index: -1;
   }
 
-
+  .monster-details-wrapper {
+    position: absolute;
+    width: auto;
+    height: 53vh;
+    top: 38vh;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 /* Monster info section */
 #monster-details {
     position: absolute;
@@ -164,7 +174,7 @@ html, body {
     height: 21vh;
     left: 50%;
     transform: translateX(-50%);
-    top: 54vh;
+    top: 16vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -212,6 +222,7 @@ html, body {
     color: #ffffff;
     font-size: 1.5vh;
     font-family: 'Poppins', sans-serif;
+    z-index: 4;
 
 }
 

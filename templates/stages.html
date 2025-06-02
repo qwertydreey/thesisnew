@@ -11,7 +11,7 @@
 </head>
 
 <body>
-  <audio id="buttonClickSound" src="/static/sfx/click.mp3" preload="auto"></audio>
+  <audio data-page="stages" id="buttonClickSound" src="/static/sfx/click.mp3" preload="auto"></audio>
 
   <div class="back">
     <a href="{{ url_for('roadmap') }}" onclick="delayedRoadmapBackRedirect(event)">
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 </script>
   
-
+<script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
 <script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 

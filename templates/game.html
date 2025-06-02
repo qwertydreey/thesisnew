@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chewy&family=Fredoka:wght@300..700&family=Varela+Round&display=swap" rel="stylesheet">
 </head>
 
-<body data-bgm="dynamic">
+<body data-page="shop" data-bgm="dynamic">
   <audio id="buttonClickSound" src="/static/sfx/click.mp3" preload="auto"></audio>
   <audio id="calcbtns" src="/static/sfx/calcbtns.mp3" preload="auto"></audio>
   <audio id="counticus" src="/static/sfx/counticusclick.mp3" preload="auto"></audio>
@@ -403,7 +403,7 @@
   
   
 
-
+<script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
 <script src="{{ url_for('static', filename='js/questions.js') }}"></script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>

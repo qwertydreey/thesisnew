@@ -8,7 +8,7 @@
   </head>
 
 
-    <body data-bgm="/static/bgm/Collection.mp3">
+    <body data-page="collectibles" data-bgm="/static/bgm/Collection.mp3">
       <div class="tab-sections">
 
         <div class="back-btn-wrapper">
@@ -21,9 +21,11 @@
         <div class="tab-slide active" id="medals-section">
                 <div class="grid" id="medals-grid">
                     <!-- Medals content will be dynamically inserted here -->
+
+                    
             </div>
-            <button class="nav-btn right" onclick="playButtonClickSound(); showSection('skins-section')">&#9654;</button>
-        </div>
+            <button id="nav-collections" class="nav-btn right" onclick="playButtonClickSound(); showSection('skins-section')">&#9654;</button>
+          </div>
     
         <!-- Skins Section (Moved inside tab-sections) -->
         <div class="tab-slide" id="skins-section">
@@ -122,59 +124,117 @@
     
     
       
-    <script>
-      const maps = ['multiplication', 'addition', 'subtraction', 'division', 'counting', 'comparison', 'numerals', 'placevalue'];
-      const stages = [1, 2, 3];
-      const medalsGrid = document.getElementById('medals-grid');
-    
-      async function loadRewards() {
-        for (const map of maps) {
-          for (const stage of stages) {
-            try {
-              const res = await fetch(`/get_stage_reward?map=${map}&stage=${stage}`);
-              const reward = await res.json();
-    
-              if (reward.error) continue;
-    
-              // Identify which type of image is present
-              const [type, path] = Object.entries(reward)[0];
-              const id = `${map}-stage${stage}-claimed`;
-    
-              const badgeDiv = document.createElement('div');
-              badgeDiv.className = 'squarebadge';
-              badgeDiv.id = id;
-    
-              const img = document.createElement('img');
-              img.src = path;
-              img.alt = `${type}`;
-              img.className = 'badge-image';
-    
-              // Check if claimed from the server
-              const claimCheck = await fetch('/check_reward_claimed', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ map, stage })
-              });
-    
-              const claimResult = await claimCheck.json();
-              const claimed = claimResult.claimed;
-    
-              if (!claimed) {
-                img.style.filter = 'grayscale(100%)';
-                img.style.opacity = '0.3';
-              }
-    
-              badgeDiv.appendChild(img);
-              medalsGrid.appendChild(badgeDiv);
-            } catch (err) {
-              // console.error(`Error loading reward for ${map} stage ${stage}:`, err);
-            }
-          }
+<script>
+const maps = ['multiplication', 'addition', 'subtraction', 'division', 'counting', 'comparison', 'numerals', 'placevalue'];
+const stages = [1, 2, 3];
+const medalsGrid = document.getElementById('medals-grid');
+
+// Badge descriptions to show on hover
+const badgeInfoTexts = {
+  multiplication: {
+    1: "This badge can be acquired after defeating THE PRODUCT GOLEM in Multiplication Stage 1.",
+    2: "Earn this badge by overcoming THE MULTI REX in Multiplication Stage 2.",
+    3: "This badge is awarded after conquering THE EQUATION BEAST in Multiplication Stage 3.",
+  },
+  division: {
+    1: "This badge can be earned by defeating THE FRACTION HOUSE in Division Stage 1.",
+    2: "Obtain this badge after overcoming THE TIDAL DRAGON in Division Stage 2.",
+    3: "This badge is awarded for conquering THE MURKY MAJESTY in Division Stage 3.",
+  },
+  addition: {
+    1: "This badge is awarded after defeating THE ADD CHIEFTAIN in Addition Stage 1.",
+    2: "Earn this badge by conquering THE SUM TITAN in Addition Stage 2.",
+    3: "This badge can be obtained after overcoming THE TOTEM FURIES in Addition Stage 3.",
+  },
+  subtraction: {
+    1: "This badge is earned by defeating THE SOARING SENTINEL in Subtraction Stage 1.",
+    2: "Obtain this badge after conquering THE PYRAMID SPHINX in Subtraction Stage 2.",
+    3: "This badge is awarded after defeating THE ANCIENT RULER in Subtraction Stage 3.",
+  },
+  counting: {
+    1: "This badge is acquired after defeating THE JUMP JESTER in Counting Stage 1.",
+    2: "Earn this badge by overcoming THE RAINBOW WISHER in Counting Stage 2.",
+    3: "This badge is awarded after conquering THE PRISMATIC HEXER in Counting Stage 3.",
+  },
+  comparison: {
+    1: "This badge is earned by defeating THE CAVERN FLYERS in Comparison Stage 1.",
+    2: "Obtain this badge after conquering THE SKYCLAW HAWKS in Comparison Stage 2.",
+    3: "This badge is awarded after defeating THE VOLCA GOLEM in Comparison Stage 3.",
+  },
+  numerals: {
+    1: "This badge can be acquired after defeating THE SWORDHALL KNIGHT in Numerals Stage 1.",
+    2: "Earn this badge by overcoming THE CHIMERA KING in Numerals Stage 2.",
+    3: "This badge is awarded after conquering THE THREEFURY KNIGHT in Numerals Stage 3.",
+  },
+  placevalue: {
+    1: "This badge is earned by defeating THE CORNFIELD SENTINEL in Place Value Stage 1.",
+    2: "Obtain this badge after conquering THE WINDMILL HAVEN in Place Value Stage 2.",
+    3: "This badge is awarded after defeating THE CINDERSCORCH in Place Value Stage 3.",
+  }
+};
+
+
+async function loadRewards() {
+  for (const map of maps) {
+    for (const stage of stages) {
+      try {
+        const res = await fetch(`/get_stage_reward?map=${map}&stage=${stage}`);
+        const reward = await res.json();
+
+        if (reward.error) continue;
+
+        // Get the image path and type from the server response
+        const [type, path] = Object.entries(reward)[0];
+        const id = `${map}-stage${stage}-claimed`;
+
+        // Create container div for each badge + info
+        const badgeDiv = document.createElement('div');
+        badgeDiv.className = 'badge-container squarebadge';
+        badgeDiv.id = id;
+
+        // Create image element for badge
+        const img = document.createElement('img');
+        img.src = path;
+        img.alt = `${type}`;
+        img.className = 'badge-image';
+
+        // Check claim status for this badge
+        const claimCheck = await fetch('/check_reward_claimed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ map, stage: Number(stage) }),
+          credentials: 'include'
+        });
+
+        const claimResult = await claimCheck.json();
+        const claimed = claimResult.claimed;
+
+        if (!claimed) {
+          img.style.filter = 'grayscale(100%)';
+          img.style.opacity = '0.3';
         }
+
+        // Append badge image
+        badgeDiv.appendChild(img);
+
+        // Create and append info text div
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'badge-info';
+        infoDiv.textContent = badgeInfoTexts[map][stage] || 'No info available';
+        badgeDiv.appendChild(infoDiv);
+
+        medalsGrid.appendChild(badgeDiv);
+      } catch (err) {
+        console.error(`Error loading badge for ${map} stage ${stage}:`, err);
       }
-    
-      loadRewards();
-    </script>
+    }
+  }
+}
+
+loadRewards();
+
+</script>
+
     
     
 
@@ -327,8 +387,8 @@
       });
       </script>
       
+      <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
       <script src="{{ url_for('static', filename='js/orientation.js') }}"></script>
-
       <script defer src="{{ url_for('static', filename='js/bgmusic.js') }}"></script>
 
     

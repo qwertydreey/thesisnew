@@ -124,81 +124,83 @@ document.addEventListener('DOMContentLoaded', async () => {
   
       // Inject CSS styles
       const style = document.createElement('style');
-      style.textContent = `
-        .tutorial-highlight-box {
-          position: absolute;
-          border: 4px solid yellow;
-          border-radius: 12px;
-          box-shadow: 0 0 15px 5px gold;
-          pointer-events: none;
-          transition: top 0.3s, left 0.3s, width 0.3s, height 0.3s;
-          z-index: 9999;
-          background: transparent;
-        }
-  
-        .tutorial-highlight-glow {
-          transition: top 0.3s, left 0.3s, width 0.3s, height 0.3s, filter 0.3s;
-          border-radius: 12px;
-          pointer-events: none;
-          filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 10px yellow);
-          z-index: 10000;
-          position: absolute;
-        }
-  
-        #tutorial-overlay {
-          position: fixed;
-          top: 0; left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0, 0, 0, 0.7);
-          z-index: 9998;
-        }
-  
-        #tutorial-popup {
-          position: fixed;
-          background: #fff;
-          padding: 20px;
-          border-radius: 10px;
-          max-width: 300px;
-          text-align: center;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-          z-index: 10001;
-          pointer-events: auto;
-        }
-  
-        #tutorial-popup p {
-          transition: opacity 0.3s ease;
-          margin-bottom: 15px;
-        }
-  
-        #tutorial-popup button {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          margin: 0 5px;
-          font-weight: 600;
-          transition: background-color 0.2s ease;
-        }
-  
-        #tutorial-popup button.next {
-          background-color: #4caf50;
-          color: white;
-        }
-  
-        #tutorial-popup button.next:hover {
-          background-color: #45a049;
-        }
-  
-        #tutorial-popup button.skip {
-          background-color: #ccc;
-          color: #333;
-        }
-  
-        #tutorial-popup button.skip:hover {
-          background-color: #b3b3b3;
-        }
-      `;
+style.textContent = `
+  .tutorial-highlight-box {
+    position: absolute;
+    border: 0.6vh solid yellow;
+    border-radius: 1.5vh;
+    box-shadow: 0 0 2vh 0.7vh gold;
+    pointer-events: none;
+    transition: top 0.3s, left 0.3s, width 0.3s, height 0.3s;
+    z-index: 9999;
+    background: transparent;
+  }
+
+  .tutorial-highlight-glow {
+    transition: top 0.3s, left 0.3s, width 0.3s, height 0.3s, filter 0.3s;
+    border-radius: 1.5vh;
+    pointer-events: none;
+    filter: drop-shadow(0 0 1vh gold) drop-shadow(0 0 1.5vh yellow);
+    z-index: 10000;
+    position: absolute;
+  }
+
+  #tutorial-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+  }
+
+  #tutorial-popup {
+    position: fixed;
+    background: #fff;
+    padding: 2vh;
+    border-radius: 1.5vh;
+    max-width: 40vh;
+    text-align: center;
+    box-shadow: 0 0 1.5vh rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    pointer-events: auto;
+  }
+
+  #tutorial-popup p {
+    transition: opacity 0.3s ease;
+    margin-bottom: 1.5vh;
+    font-size: 1.8vh;
+  }
+
+  #tutorial-popup button {
+    padding: 1vh 2vh;
+    border: none;
+    border-radius: 1vh;
+    cursor: pointer;
+    margin: 0 1vh;
+    font-weight: 600;
+    font-size: 1.6vh;
+    transition: background-color 0.2s ease;
+  }
+
+  #tutorial-popup button.next {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  #tutorial-popup button.next:hover {
+    background-color: #45a049;
+  }
+
+  #tutorial-popup button.skip {
+    background-color: #ccc;
+    color: #333;
+  }
+
+  #tutorial-popup button.skip:hover {
+    background-color: #b3b3b3;
+  }
+`;
       document.head.appendChild(style);
   
       const overlay = document.createElement('div');
